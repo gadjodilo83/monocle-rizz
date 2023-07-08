@@ -264,6 +264,3 @@ const fetchGpt = async () => {
 };
 
 export default Home;
-
-
-export default Home;
