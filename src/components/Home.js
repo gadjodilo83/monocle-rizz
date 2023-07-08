@@ -94,7 +94,7 @@ const fetchGpt = async () => {
 
   useEffect(() => {
     if (activeButton === 'A') {
-      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetzte den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
     } else if (activeButton === 'B') {
       setContext(`Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
     }
@@ -115,7 +115,7 @@ const fetchGpt = async () => {
       setInputLanguage("de");
       setCurrentFlag(swissFlag);
       setSystemPrompt(/* ... */);
-      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetzte den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzt hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
     }
   }
 
@@ -262,5 +262,8 @@ const fetchGpt = async () => {
     </>
   );
 };
+
+export default Home;
+
 
 export default Home;
