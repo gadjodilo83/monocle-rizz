@@ -76,7 +76,7 @@ const fetchGpt = async () => {
       max_tokens: 1000,
       messages: [
         {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Wenn der Eingabetext italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag von dir in italienischer Sprache auf den Eingabetext zu antworten." + promptContext},
-        {"role": "user", "content": "Übersetze: " + userPrompt}
+        {"role": "user", "content": "Übersetze den text und gib einen Antwortvorschlag: " + userPrompt}
       ]
     }),
     headers: {
