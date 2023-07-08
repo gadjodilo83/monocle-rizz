@@ -75,7 +75,7 @@ const fetchGpt = async () => {
       temperature: 0.9,
       max_tokens: 1000,
       messages: [
-        {"role": "system", "content": promptContext},
+        {"role": "system", "content": "Du bist ein Sprachübersetzer" + promptContext},
         {"role": "user", "content": "Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + userPrompt}
       ]
     }),
