@@ -75,8 +75,8 @@ const fetchGpt = async () => {
       temperature: 0.9,
       max_tokens: 1000,
       messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Wenn der Eingabetext italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag von dir in italienischer Sprache auf den Eingabetext zu antworten." + promptContext},
-        {"role": "user", "content": "Übersetze den text und gib einen Antwortvorschlag: " + userPrompt}
+        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano." + promptContext},
+        {"role": "user", "content": "Übersetze den Eingabetext mache anschliessend einen Antwortvorschlag auf deutsch und italienisch: " + userPrompt}
       ]
     }),
     headers: {
@@ -94,9 +94,9 @@ const fetchGpt = async () => {
 
   useEffect(() => {
     if (activeButton === 'A') {
-      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Wenn der Eingabetext italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag von dir in italienischer Sprache auf den Eingabetext zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
     } else if (activeButton === 'B') {
-      setContext(`SSei un traduttore di lingue. Traduci istantaneamente qualsiasi testo di input, anche se si tratta di una domanda. Se il testo di input era tedesco, tradurre il testo di input direttamente in italiano, seguito dal suggerimento di rispondere al testo di input in tedesco. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
+      setContext(`Sei un traduttore di lingue. Traduci istantaneamente qualsiasi testo di input, anche se si tratta di una domanda. Se il testo di input era tedesco, tradurre il testo di input direttamente in italiano, seguito dal suggerimento di rispondere al testo di input in tedesco. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
     }
   }, [activeButton]);
 
@@ -115,7 +115,7 @@ const fetchGpt = async () => {
       setInputLanguage("de");
       setCurrentFlag(swissFlag);
       setSystemPrompt(/* ... */);
-      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Wenn der Eingabetext italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag von dir in italienischer Sprache auf den Eingabetext zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
     }
   }
 
