@@ -60,9 +60,9 @@ const Home = () => {
     },
   });
 
-  const fetchGpt = async () => {
-    const userPrompt = transcript.text;
-    let promptContext = context;
+    const fetchGpt = async () => {
+		const userPrompt = transcript.text;
+		let promptContext = context;
 
     if (activeButton === "A") {
       setInputLanguage('de');
