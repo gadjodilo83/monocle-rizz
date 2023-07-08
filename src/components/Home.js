@@ -61,7 +61,7 @@ const Home = () => {
   });
 
   const fetchGpt = async () => {
-    const userPrompt = window.transcript;
+    const userPrompt = transcript;
     let promptContext = context;
 
     if (activeButton === "A") {
