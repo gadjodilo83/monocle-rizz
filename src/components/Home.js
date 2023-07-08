@@ -1,17 +1,15 @@
 import Head from "next/head";
-import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { useState, useEffect } from "react";
 import { ensureConnected } from "@/utils/bluetooth/js/main";
 import { replRawMode, replSend } from "@/utils/bluetooth/js/repl";
 import { Button } from "antd";
 import { useWhisper } from "@chengsokdara/use-whisper";
 import { app } from "@/utils/app";
 import { execMonocle } from "@/utils/comms";
+import React, { useState, useEffect } from 'react';
+
 const swissFlag = '/swiss.png';
 const italianFlag = '/italy.png';
-
-const inter = Inter({ subsets: ["latin"] });
 
 // BatteryStatus component
 const BatteryStatus = () => {
@@ -33,67 +31,74 @@ const BatteryStatus = () => {
   }, []);
 
   return (
-	<div className={styles['battery-status']} style={{ color: 'green', fontSize: '12px', backgroundColor: 'white' }}>
-	  <p>{batteryStatus.level}%</p>
-	</div>	
-	
+    <div className={styles['battery-status']} style={{ color: 'green', fontSize: '12px', backgroundColor: 'white' }}>
+      <p>{batteryStatus.level}%</p>
+    </div>
   );
 };
 
 const Home = () => {
-  const [connected, setConnected] = useState(false);
+  const [activeButton, setActiveButton] = useState(null);
+  const [context, setContext] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [inputLanguage, setInputLanguage] = useState("de");
+  const [connected, setConnected] = useState(false);
   const [currentFlag, setCurrentFlag] = useState(swissFlag);
-  const [systemPrompt, setSystemPrompt] = useState(`
-    Du bist in hilfreicher Sprachuebersetzer.
-    Du uebersetzt alles ohne umschweifungen direkt von der Sprache deutsch auf italienisch. 
-    Du uebersetz direkt alle Eingaben die du erhälst auf italienisch, danach folgt einen Voschlag auf deutsch zu antworten.
-	Wenn du jeweils nach dem übersetzen einen Vorschlag zum antworten machts, dann beginne den Satz immer mit "Vorschlag:".
-  `);
-  
+  const [inputLanguage, setInputLanguage] = useState('de');
+  const [temperature, setTemperature] = useState(0.9);
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [chatGptResponse, setChatGptResponse] = useState('');
+  const [typingIndex, setTypingIndex] = useState(0);
+  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN); // add this line
 
-  const { startRecording, stopRecording, transcript } = useWhisper({
-    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_TOKEN,
-    streaming: true,
-    timeSlice: 500,
-    whisperConfig: {
-      language: inputLanguage,
+	const { startRecording, stopRecording, transcript } = useWhisper({
+	  apiKey: apiKey,
+	  streaming: true,
+	  timeSlice: 500,
+	  whisperConfig: {
+		language: inputLanguage,
+	  },
+	});
+
+const fetchGpt = async () => {
+  const userPrompt = window.transcript;
+  let promptContext = context;
+
+  if (activeButton === "A") {
+    promptContext = "Vordefinierter Text für Button A";
+  } else if (activeButton === "B") {
+    promptContext = "Vordefinierter Text für Button B";
+  }
+
+  const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      temperature: 0.9,
+      max_tokens: 1000,
+      messages: [
+        {"role": "system", "content": promptContext},
+        {"role": "user", "content": "Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + userPrompt}
+      ]
+    }),
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
     },
+    method: "POST",
   });
 
-	const fetchGpt = async () => {
-	 const userPrompt = window.transcript;
-	 const response = await fetch(`https://api.openai.com/v1/completions`, {
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        prompt:
-          systemPrompt +
-          "\ntranscript: " +
-          userPrompt +
-          "\noptimal interviewee's response: ",
-        temperature: 0.2,
-        max_tokens: 1000,
-        frequency_penalty: 0,
-        presence_penalty: 0,
-      }),
-      headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-
-    const resJson = await response.json();
-    const res = resJson?.choices?.[0]?.text;
-    if (!res) return;
-    return res;  // Gibt das Ergebnis der Anfrage zurück.
- };
+  const resJson = await response.json();
+  const res = resJson?.choices?.[0]?.message?.content;
+  if (!res) return;
+  return res;
+};
 
   useEffect(() => {
-    window.transcript = transcript.text;
-    fetchGpt();
-  }, [transcript.text]);
+    if (activeButton === 'A') {
+      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetzte den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+    } else if (activeButton === 'B') {
+      setContext(`Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
+    }
+  }, [activeButton]);
 
   function relayCallback(msg) {
     if (!msg) {
@@ -102,24 +107,15 @@ const Home = () => {
     if (msg.trim() === "trigger b") {
       setInputLanguage("it");
       setCurrentFlag(italianFlag);
-      setSystemPrompt(`
-        Du bist in hilfreicher Sprachuebersetzer.
-        Du uebersetzt alles ohne umschweifungen direkt von der Sprache italienisch auf deutsch. 
-        Du uebersetz direkt alle Eingaben die du erhälst auf deutsch, danach folgt einen Voschlag auf italienisch zu antworten.
-		Wenn du jeweils nach dem übersetzen einen Vorschlag zum antworten machts, dann beginne den Satz immer mit "Vorschlag:".
-      `);
+      setSystemPrompt(/* ... */);
+      setContext(`Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
     }
 
     if (msg.trim() === "trigger a") {
       setInputLanguage("de");
-	  setCurrentFlag(swissFlag);
-      setSystemPrompt(`
-        Du bist in hilfreicher Sprachuebersetzer.
-        Du uebersetzt alles ohne umschweifungen direkt von der Sprache deutsch auf italienisch. 
-        Du uebersetz direkt alle Eingaben die du erhälst auf italienisch, danach folgt einen Voschlag auf deutsch zu antworten.
-		Wenn du jeweils nach dem übersetzen einen Vorschlag zum antworten machts, dann beginne den Satz immer mit "Vorschlag:".
-
-      `);
+      setCurrentFlag(swissFlag);
+      setSystemPrompt(/* ... */);
+      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetzte den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
     }
   }
 
@@ -167,61 +163,104 @@ const Home = () => {
     }
   }
 
-return (
+  useEffect(() => {
+    const typingTimer = setInterval(() => {
+      if (typingIndex < chatGptResponse.length) {
+        setTypingIndex(typingIndex + 1);
+      }
+    }, 50);
+
+    return () => clearInterval(typingTimer);
+  }, [chatGptResponse, typingIndex]);
+
+  return (
     <>
       <Head>
         <title>switGPT</title>
         <meta name="description" content="Generated by create Marc Simon Frei" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
       </Head>
+
       <main className="flex w-screen h-screen flex-col items-center justify-center">
+        <p
+          className="text-3xl mb-4"
+          style={{ color: connected ? 'green' : 'red' }}
+        >
+          {connected ? "Monocle Connected" : "Monocle Disconnected"}
+        </p>
 
-		<p 
-		  className="text-3xl mb-4" 
-		  style={{ color: connected ? 'green' : 'red' }}
-		>
-		  {connected ? "Monocle Connected" : "Monocle Disconnected"}
-		</p>
-
-		
         <div className="mb-4">
           <img src={currentFlag} alt="Current language flag" />
         </div>
-        {transcript.text}
-		<Button
-		  type="primary"
-		  onClick={async () => {
-			await ensureConnected(logger, relayCallback);
-			app.run(execMonocle);
-			const res = await fetchGpt();  // Ruft die Funktion fetchGpt auf und speichert das Ergebnis.
-			if (res) {
-			  await displayRawRizz(res);  // Wenn das Ergebnis existiert, geben Sie es an die Funktion displayRawRizz weiter.
-			}
-		  }}
-		>
-		  Connect
-		</Button>
-		<div className="mt-2 flex gap-2">
-		  <Button onClick={() => relayCallback("trigger a")}>
-			Switch to German
-		  </Button>
-		  <Button onClick={() => relayCallback("trigger b")}>
-			Switch to Italian
-		  </Button>
-		</div>
-		{/* Neuer Code endet hier */}
 
-		<div className="flex flex-col items-center mt-5 gap-2">
-		  <Button onClick={onRecord}>
-			{isRecording ? "Stop recording" : "Start recording"}
-		  </Button>
-		  <BatteryStatus />
-		</div>
-		</main>
+        <Button
+          type="primary"
+          onClick={async () => {
+            await ensureConnected(logger, relayCallback);
+            app.run(execMonocle);
+            const res = await fetchGpt();
+
+            if (res) {
+              setChatGptResponse(res);
+              await displayRawRizz(res);
+            }
+          }}
+        >
+          Connect
+        </Button>
+
+        <div className="mt-2 flex gap-2">
+          <Button onClick={() => relayCallback("trigger a")}>
+            Switch to German
+          </Button>
+          <Button onClick={() => relayCallback("trigger b")}>
+            Switch to Italian
+          </Button>
+        </div>
+
+        <div className="flex flex-col items-center mt-5 gap-2">
+          <Button onClick={onRecord}>
+            {isRecording ? "Stop recording" : "Start recording"}
+          </Button>
+          <BatteryStatus />
+        </div>
+
+        <div>
+          <label>
+            Kontext:
+            <textarea style={{ width: "800px", height: "200px" }} value={context} onChange={(e) => setContext(e.target.value)} />
+          </label>
+        </div>
+
+        <div>
+          <label>
+            Temperatur:
+            <input type="number" min="0" max="2" step="0.1" value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))} />
+          </label>
+        </div>
+
+	<div>
+	  <label>
+		API Key:
+		<input type="text" value={apiKey.replace(/[<>]/g, '')} onChange={(e) => setApiKey(e.target.value)} />
+	  </label>
+	</div>
+
+        <div>
+          <label>
+            ChatGPT:
+            <textarea
+              style={{ width: "800px", height: "200px" }}
+              value={chatGptResponse.substring(0, typingIndex)}
+              readOnly
+            />
+          </label>
+        </div>
+      </main>
     </>
   );
 };
 
 export default Home;
-
