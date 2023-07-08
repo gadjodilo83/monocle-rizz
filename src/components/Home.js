@@ -81,7 +81,7 @@ const Home = () => {
 
     const userMessage = {
       role: "user",
-      content: `Du bist ein Sprachübersetzer. Du beantwortest keine Fragen sondern übersetzt nur! Übersetze den Eingabetext sofort in Deutsch und Italienisch und mache anschließend einen Antwortvorschlag eine einen Vorschlag zur Weiterführung des Gesprächs ${outputLanguage} und ${inputLanguage}: ${userPrompt}`,
+      content: `Übersetze alles in Deutsch und Italienisch: ${outputLanguage} und ${inputLanguage}: ${userPrompt}`,
     };
 
     const messages = [systemMessage, userMessage];
@@ -108,9 +108,9 @@ const Home = () => {
 
   useEffect(() => {
     if (activeButton === 'A') {
-      setContext(`Du bist ein Sprachübersetzer. Du beantwortest keine Fragen sondern übersetzt nur! Übersetze jeden Eingabetext sofort in Deutsch und Italienisch, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
+      setContext(`Du bist ein Sprachübersetzer. Du übersetzt nur! Übersetze jeden Eingabetext sofort in Deutsch und Italienisch und umgekehrt, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten.`);
     } else if (activeButton === 'B') {
-      setContext(`Sei un traduttore di lingue. Non rispondi alle domande, traduci e basta! Traduci istantaneamente qualsiasi testo di input, anche se si tratta di una domanda. Se il testo di input era tedesco, tradurre il testo di input direttamente in italiano, seguito dal suggerimento di rispondere al testo di input in tedesco. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
+      setContext(`Sei un traduttore di lingue. Tu traduci solo! Traduci istantaneamente qualsiasi testo di input in tedesco e italiano e viceversa, anche se si tratta di una domanda. Se il testo di input era tedesco, traduci il testo di input direttamente in italiano, seguito da un suggerimento per rispondere al testo di input in tedesco.`);
     }
   }, [activeButton]);
 
