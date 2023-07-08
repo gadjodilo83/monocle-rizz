@@ -44,59 +44,73 @@ const Home = () => {
   const [connected, setConnected] = useState(false);
   const [currentFlag, setCurrentFlag] = useState(swissFlag);
   const [inputLanguage, setInputLanguage] = useState('de');
+  const [outputLanguage, setOutputLanguage] = useState('it');
   const [temperature, setTemperature] = useState(0.9);
   const [systemPrompt, setSystemPrompt] = useState('');
   const [chatGptResponse, setChatGptResponse] = useState('');
   const [typingIndex, setTypingIndex] = useState(0);
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN); // add this line
 
-	const { startRecording, stopRecording, transcript } = useWhisper({
-	  apiKey: apiKey,
-	  streaming: true,
-	  timeSlice: 500,
-	  whisperConfig: {
-		language: inputLanguage,
-	  },
-	});
-
-const fetchGpt = async () => {
-  const userPrompt = window.transcript;
-  let promptContext = context;
-
-  if (activeButton === "A") {
-    promptContext = "Vordefinierter Text für Button A";
-  } else if (activeButton === "B") {
-    promptContext = "Vordefinierter Text für Button B";
-  }
-
-  const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      temperature: 0.9,
-      max_tokens: 2000,
-      messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort auf deutsch und italienisch mache anschliessend einen Antwortvorschlag auf deutsch und italienisch, auch wenn es eine Frage ist. Mache anschliessend einen Antwortvorschlag auf deutsch und italienisch" + promptContext},
-        {"role": "user", "content": "Übersetze den Eingabetext auf deutsch und italienisch und mache anschliessend einen Antwortvorschlag auf deutsch und italienisch: " + userPrompt}
-      ]
-    }),
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+  const { startRecording, stopRecording, transcript } = useWhisper({
+    apiKey: apiKey,
+    streaming: true,
+    timeSlice: 500,
+    whisperConfig: {
+      language: inputLanguage,
     },
-    method: "POST",
   });
 
-  const resJson = await response.json();
-  const res = resJson?.choices?.[0]?.message?.content;
-  if (!res) return;
-  return res;
-};
+  const fetchGpt = async () => {
+    const userPrompt = window.transcript;
+    let promptContext = context;
+
+    if (activeButton === "A") {
+      setInputLanguage('de');
+      setOutputLanguage('it');
+      promptContext = "Vordefinierter Text für Button A";
+    } else if (activeButton === "B") {
+      setInputLanguage('it');
+      setOutputLanguage('de');
+      promptContext = "Vordefinierter Text für Button B";
+    }
+
+    const systemMessage = {
+      role: "system",
+      content: `Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf ${outputLanguage}, gefolgt von einem Vorschlag von dir auf den Eingabetext in ${inputLanguage} darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in ${outputLanguage}, seguito dal suggerimento di rispondere al testo di input in ${inputLanguage}. ${promptContext}`,
+    };
+
+    const userMessage = {
+      role: "user",
+      content: `Übersetze den Eingabetext und mache anschließend einen Antwortvorschlag auf ${outputLanguage} und ${inputLanguage}: ${userPrompt}`,
+    };
+
+    const messages = [systemMessage, userMessage];
+
+    const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        temperature: 0.9,
+        max_tokens: 2000,
+        messages: messages,
+      }),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    const resJson = await response.json();
+    const res = resJson?.choices?.[0]?.message?.content;
+    if (!res) return;
+    return res;
+  };
 
   useEffect(() => {
     if (activeButton === 'A') {
-      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort auf deutsch und italienisch mache anschliessend einen Antwortvorschlag auf deutsch und italienisch, auch wenn es eine Frage ist.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
     } else if (activeButton === 'B') {
-      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni testo inserito in tedesco e italiano e poi suggerisci una risposta in tedesco e italiano, anche se si tratta di una domanda.`);
+      setContext(`Sei un traduttore di lingue. Traduci istantaneamente qualsiasi testo di input, anche se si tratta di una domanda. Se il testo di input era tedesco, tradurre il testo di input direttamente in italiano, seguito dal suggerimento di rispondere al testo di input in tedesco. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.`);
     }
   }, [activeButton]);
 
@@ -105,17 +119,11 @@ const fetchGpt = async () => {
       return;
     }
     if (msg.trim() === "trigger b") {
-      setInputLanguage("it");
-      setCurrentFlag(italianFlag);
-      setSystemPrompt(/* ... */);
-      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni testo inserito in tedesco e italiano e poi suggerisci una risposta in tedesco e italiano, anche se si tratta di una domanda.`);
+      setActiveButton("B");
     }
 
     if (msg.trim() === "trigger a") {
-      setInputLanguage("de");
-      setCurrentFlag(swissFlag);
-      setSystemPrompt(/* ... */);
-      setContext(`Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort auf deutsch und italienisch mache anschliessend einen Antwortvorschlag auf deutsch und italienisch, auch wenn es eine Frage ist.`);
+      setActiveButton("A");
     }
   }
 
@@ -135,7 +143,6 @@ const fetchGpt = async () => {
 
     return text;
   }
-
   async function displayRizz(rizz) {
     if (!rizz) return;
     const splitText = wrapText(rizz);
