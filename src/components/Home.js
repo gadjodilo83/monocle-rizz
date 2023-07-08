@@ -136,21 +136,25 @@ const fetchGpt = async () => {
     return text;
   }
 
-  async function displayRizz(rizz) {
-    if (!rizz) return;
-    const splitText = wrapText(rizz);
-    let replCmd = "import display;";
+async function displayRizz(rizz) {
+  if (!rizz) return;
+  const splitText = wrapText(rizz);
+  let replCmd = "import display;";
 
-    for (let i = 0; i < splitText.length; i++) {
-      replCmd += `display.text("${splitText[i]}", 0, ${i * 50}, 0xffffff);`;
+  for (let i = 0; i < splitText.length; i++) {
+    const text = splitText[i];
+    for (let j = 0; j < text.length; j++) {
+      const delay = j * 100; // Zeitverzögerung pro Buchstabe (hier: 100ms)
+      replCmd += `timer.delay(${delay});`;
+      replCmd += `display.text("${text.substring(0, j + 1)}", 0, ${i * 50}, 0xffffff);`;
+      replCmd += "display.show();";
     }
-
-    replCmd += "display.show();";
-
-    console.log("**** replCmd ****", replCmd);
-
-    await replSend(replCmd);
   }
+
+  console.log("**** replCmd ****", replCmd);
+
+  await replSend(replCmd);
+}
 
   async function displayRawRizz(rizz) {
     await replRawMode(true);
