@@ -69,15 +69,28 @@ const fetchGpt = async () => {
     promptContext = "Vordefinierter Text für Button B";
   }
 
+  const systemMessage = {
+    role: "system",
+    content: inputLanguage === "it"
+      ? "Sei un traduttore di lingue. Traduci istantaneamente qualsiasi testo di input, anche se si tratta di una domanda. Se il testo di input era tedesco, tradurre il testo di input direttamente in italiano, seguito dal suggerimento di rispondere al testo di input in tedesco. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano."
+      : "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano.",
+  };
+
+  const userMessage = {
+    role: "user",
+    content: inputLanguage === "it"
+      ? `Se il testo inserito è in italiano, rispondi in italiano${userPrompt}`
+      : `Wenn die Texteingabe in deutscher Sprache erfolgt, antworte auf deutsch${userPrompt}`,
+  };
+
+  const messages = [systemMessage, userMessage];
+
   const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
       temperature: 0.9,
-      max_tokens: 1000,
-      messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Se il testo di input era italiano, tradurre il testo di input direttamente in tedesco, seguito dal suggerimento di rispondere al testo di input in italiano." + promptContext},
-        {"role": "user", "content": "Übersetze den Eingabetext mache anschliessend einen Antwortvorschlag auf deutsch und italienisch: " + userPrompt}
-      ]
+      max_tokens: 2000,
+      messages: messages,
     }),
     headers: {
       Authorization: `Bearer ${apiKey}`,
