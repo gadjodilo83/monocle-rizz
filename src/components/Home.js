@@ -75,7 +75,7 @@ const fetchGpt = async () => {
       temperature: 0.9,
       max_tokens: 1000,
       messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine Frage ist. Wenn die Eingabe deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag auf den Eingabetext auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag auf den Eingabetext auf italienisch zu antworten." + promptContext},
+        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort, auch wenn es eine Frage ist. Wenn der Eingabetext deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag von dir auf den Eingabetext in deutscher Sprache darauf zu antworten. Wenn der Eingabetext italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag von dir in italienischer Sprache auf den Eingabetext zu antworten." + promptContext},
         {"role": "user", "content": "Übersetze: " + userPrompt}
       ]
     }),
@@ -94,9 +94,9 @@ const fetchGpt = async () => {
 
   useEffect(() => {
     if (activeButton === 'A') {
-      setContext(`Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort.`);
     } else if (activeButton === 'B') {
-      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni input, anche se si tratta di una domanda. Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
+      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni input.`);
     }
   }, [activeButton]);
 
@@ -108,14 +108,14 @@ const fetchGpt = async () => {
       setInputLanguage("it");
       setCurrentFlag(italianFlag);
       setSystemPrompt(/* ... */);
-      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni input, anche se si tratta di una domanda. Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
+      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni input.`);
     }
 
     if (msg.trim() === "trigger a") {
       setInputLanguage("de");
       setCurrentFlag(swissFlag);
       setSystemPrompt(/* ... */);
-      setContext(`Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzt hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort.`);
     }
   }
 
