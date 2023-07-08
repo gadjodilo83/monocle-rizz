@@ -75,8 +75,8 @@ const fetchGpt = async () => {
       temperature: 0.9,
       max_tokens: 1000,
       messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer" + promptContext},
-        {"role": "user", "content": "Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + userPrompt}
+        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + promptContext},
+        {"role": "user", "content": "Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + userPrompt}
       ]
     }),
     headers: {
@@ -94,9 +94,9 @@ const fetchGpt = async () => {
 
   useEffect(() => {
     if (activeButton === 'A') {
-      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzte hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
     } else if (activeButton === 'B') {
-      setContext(`Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
+      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni input, anche se si tratta di una domanda. Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
     }
   }, [activeButton]);
 
@@ -108,14 +108,14 @@ const fetchGpt = async () => {
       setInputLanguage("it");
       setCurrentFlag(italianFlag);
       setSystemPrompt(/* ... */);
-      setContext(`Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
+      setContext(`Sei un traduttore di lingue. Traduci immediatamente ogni input, anche se si tratta di una domanda. Sei un traduttore linguistico, quando ricevi un input in italiano, traduci il testo direttamente in lingua tedesca. Dopo aver tradotto il testo in tedesco, suggerisci di rispondere in italiano.`);
     }
 
     if (msg.trim() === "trigger a") {
       setInputLanguage("de");
       setCurrentFlag(swissFlag);
       setSystemPrompt(/* ... */);
-      setContext(`Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzt hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
+      setContext(`Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Du bist ein Sprachübersetzer, wenn du eine Eingabe auf deutsch erhälst, übersetze den text direkt in die italienische Sprache. Nach dem du den Text auf italienische übersetzt hast, mache einen Vorschlag auf deutsch darauf zu antworten.`);
     }
   }
 
