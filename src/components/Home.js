@@ -75,8 +75,8 @@ const fetchGpt = async () => {
       temperature: 0.9,
       max_tokens: 1000,
       messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + promptContext},
-        {"role": "user", "content": "Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine frage ist. Wenn die Eingabe deutsch war, übersetze den text direkt auf italienisch, gefolgt von einem vorschlag auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den text direkt auf deustch, gefolgt von einem vorschlag auf italienisch zu antworten." + userPrompt}
+        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jede eingabe sofort, auch wenn es eine Frage ist. Wenn die Eingabe deutsch war, übersetze den Eingabetext direkt auf italienisch, gefolgt von einem Vorschlag auf den Eingabetext auf deutsch zu antworten. Wenn die Eingabe italienisch war, übersetze den Eingabetext direkt auf deutsch, gefolgt von einem Vorschlag auf den Eingabetext auf italienisch zu antworten." + promptContext},
+        {"role": "user", "content": userPrompt}
       ]
     }),
     headers: {
