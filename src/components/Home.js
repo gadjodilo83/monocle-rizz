@@ -30,24 +30,25 @@ const Home = () => {
 
   const fetchGpt = async () => {
     const userPrompt = window.transcript;
-    const systemPrompt = translationDirection === "de-it"
-      ? `
-          Du bist ein Sprachlehrer und übersetzt jeden Input direkt ins Deutsche und Italienische. 
-          Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.
-        `
-      : `
-          Sei un insegnante di lingue e traduci ogni input direttamente in tedesco e italiano.
-          Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.
-        `;
+	const systemPrompt = translationDirection === "de-it"
+	  ? `
+		  Du bist ein Sprachlehrer und übersetzt jeden Input direkt ins Deutsche und Italienische. 
+		  Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.
+		`
+	  : `
+		  Sei un insegnante di lingue e traduci ogni input direttamente in tedesco e italiano.
+		  Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.
+		`;
 
-    const response = await fetch(`https://api.openai.com/v1/completions`, {
-      body: JSON.stringify({
-        model: "text-davinci-003",
+	const response = await fetch(`https://api.openai.com/v1/completions`, {
+	  body: JSON.stringify({
+		model: "gpt-3.5-turbo",
+
         prompt:
           systemPrompt +
           "\ntranscript: " +
           userPrompt +
-          "\nÜbersetzung auf deutsch und italienisch: ",
+          "\nÜbersetze alles auf deutsch und italienisch: ",
         temperature: 0.7,
         max_tokens: 512,
         frequency_penalty: 0,
