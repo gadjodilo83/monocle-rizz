@@ -14,9 +14,10 @@ const inter = Inter({ subsets: ["latin"] });
 const Home = () => {
   const [connected, setConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN);
 
   const { startRecording, stopRecording, transcript } = useWhisper({
-    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_TOKEN,
+    apiKey: apiKey,
     streaming: true,
     timeSlice: 500,
     whisperConfig: {
@@ -28,7 +29,7 @@ const Home = () => {
     const userPrompt = window.transcript;
     const systemPrompt = `
 
-		Du bist ein Übersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
+		Du bist ein Sprachübersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
 		Du machst auch Vorschläge, 
 		um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweil immer auf deutsch und italienisch.
 
@@ -76,6 +77,12 @@ const Home = () => {
         <div className="flex w-screen h-screen flex-col items-center justify-center">
           <p className="text-3xl">{connected ? "Connected" : "Disconnected"}</p>
           {transcript.text}
+          <input
+            type="text"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            placeholder="Enter API Key"
+          />
           <Button
             type="primary"
             onClick={async () => {
