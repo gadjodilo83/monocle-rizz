@@ -32,13 +32,12 @@ const Home = () => {
     const userPrompt = window.transcript;
     const systemPrompt = translationDirection === "de-it"
       ? `
-          Du bist ein Sprachübersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
-          Du machst auch Vorschläge, 
-          um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweils immer auf deutsch und italienisch.
+          Du bist ein Sprachlehrer und übersetzt jeden Input direkt ins Deutsche und Italienische. 
+          Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.
         `
       : `
-          Sei un traduttore vocale che traduce ogni input direttamente da italiano a tedesco e viceversa.
-          Fai anche suggerimenti per rispondere a una domanda o come continuare la conversazione, sia in tedesco che in italiano.
+          Sei un insegnante di lingue e traduci ogni input direttamente in tedesco e italiano.
+          Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.
         `;
 
     const response = await fetch(`https://api.openai.com/v1/completions`, {
@@ -64,30 +63,7 @@ const Home = () => {
     const resJson = await response.json();
     const res = resJson?.choices?.[0]?.text;
     if (!res) return;
-
-    const splitRes = res.split("\n");
-    const deutschUebersetzung = splitRes[0];
-    const italienischUebersetzung = splitRes[1];
-    const deutschVorschlag = splitRes[2];
-    const italienischVorschlag = splitRes[3];
-    const deutschGespraechsvorschlag = splitRes[4];
-    const italienischGespraechsvorschlag = splitRes[5];
-
-    console.log("Deutsche Übersetzung:", deutschUebersetzung);
-    console.log("Italienische Übersetzung:", italienischUebersetzung);
-    console.log("Antwortvorschlag auf Deutsch:", deutschVorschlag);
-    console.log("Antwortvorschlag auf Italienisch:", italienischVorschlag);
-    console.log("Vorschlag für Gesprächsweiterführung auf Deutsch:", deutschGespraechsvorschlag);
-    console.log("Vorschlag für Gesprächsweiterführung auf Italienisch:", italienischGespraechsvorschlag);
-
-    await displayRawRizz(
-      `Deutsche Übersetzung: ${deutschUebersetzung}\n` +
-      `Italienische Übersetzung: ${italienischUebersetzung}\n` +
-      `Antwortvorschlag auf Deutsch: ${deutschVorschlag}\n` +
-      `Antwortvorschlag auf Italienisch: ${italienischVorschlag}\n` +
-      `Vorschlag für Gesprächsweiterführung auf Deutsch: ${deutschGespraechsvorschlag}\n` +
-      `Vorschlag für Gesprächsweiterführung auf Italienisch: ${italienischGespraechsvorschlag}`
-    );
+    await displayRawRizz(res);
   };
 
   useEffect(() => {
