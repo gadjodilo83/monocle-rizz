@@ -15,8 +15,6 @@ const Home = () => {
   const [connected, setConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN);
-  const [chatGptResponse, setChatGptResponse] = useState("");
-  const [typingIndex, setTypingIndex] = useState(0);
 
   const { startRecording, stopRecording, transcript } = useWhisper({
     apiKey: apiKey,
@@ -33,7 +31,7 @@ const Home = () => {
 
 		Du bist ein Sprachübersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
 		Du machst auch Vorschläge, 
-		um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweils immer auf deutsch und italienisch.
+		um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweil immer auf deutsch und italienisch.
 
     `;
     const response = await fetch(`https://api.openai.com/v1/completions`, {
@@ -63,14 +61,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    const typingTimer = setInterval(() => {
-      if (typingIndex < chatGptResponse.length) {
-        setTypingIndex(typingIndex + 1);
-      }
-    }, 50);
-
-    return () => clearInterval(typingTimer);
-  }, [chatGptResponse, typingIndex]);
+    // Sync the window variable and the transcript
+    window.transcript = transcript.text;
+  }, [transcript.text]);
 
   return (
     <>
@@ -89,7 +82,6 @@ const Home = () => {
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="Enter API Key"
-            style={{ marginBottom: "10px" }}
           />
           <Button
             type="primary"
@@ -98,7 +90,6 @@ const Home = () => {
               app.run(execMonocle);
               await displayRawRizz();
             }}
-            style={{ marginTop: "10px" }}
           >
             Connect
           </Button>
