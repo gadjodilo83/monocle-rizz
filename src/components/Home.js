@@ -60,7 +60,7 @@ const Home = () => {
 	});
 
 const fetchGpt = async () => {
-  const userPrompt = window.transcript;
+  const userPrompt = transcript;
   let promptContext = context;
 
   if (activeButton === "A") {
@@ -69,14 +69,19 @@ const fetchGpt = async () => {
     promptContext = "Vordefinierter Text für Button B";
   }
 
+  // Überprüfen Sie, ob der Eingabetext vorhanden ist
+  if (!userPrompt || userPrompt.trim() === "") {
+    return;
+  }
+
   const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
       temperature: 0.9,
       max_tokens: 2000,
       messages: [
-        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort auf Deutsch und Italienisch, auch wenn es eine Frage ist. Mache anschliessend einen Antwortvorschlag oder einen Vorschlag um die Konversation weiterzuführen auf deutsch und italienisch" + promptContext},
-        {"role": "user", "content": "Übersetze den Eingabetext mache anschliessend einen Antwortvorschlag oder einen Vorschlag um die Konversation weiterzuführen auf deutsch und italienisch: " + userPrompt}
+        {"role": "system", "content": "Du bist ein Sprachübersetzer. Übersetze jeden Eingabetext sofort auf Deutsch und Italienisch, auch wenn es eine Frage ist. Mache anschliessend einen Antwortvorschlag oder einen Vorschlag um die Konversation weiterzuführen und zwar immer auf deutsch und italienisch" + promptContext},
+        {"role": "user", "content": "Übersetze den Eingabetext und mache anschliessend einen Antwortvorschlag oder einen Vorschlag um die Konversation weiterzuführen auf deutsch und italienisch: " + userPrompt}
       ]
     }),
     headers: {
