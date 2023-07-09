@@ -94,6 +94,7 @@ const fetchGpt = async () => {
       </Head>
       <main className={`${inter.className} ${styles.main}`}>
         <div className="flex w-screen h-screen flex-col items-center justify-center">
+          <h1 className="text-3xl">Monocle-Translator</h1> {/* Neuer Text */}
           <p className="text-3xl">{connected ? "Connected" : "Disconnected"}</p>
           {transcript.text}
           <input
