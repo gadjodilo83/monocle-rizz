@@ -64,7 +64,30 @@ const Home = () => {
     const resJson = await response.json();
     const res = resJson?.choices?.[0]?.text;
     if (!res) return;
-    await displayRawRizz(res);
+
+    const splitRes = res.split("\n");
+    const deutschUebersetzung = splitRes[0];
+    const italienischUebersetzung = splitRes[1];
+    const deutschVorschlag = splitRes[2];
+    const italienischVorschlag = splitRes[3];
+    const deutschGespraechsvorschlag = splitRes[4];
+    const italienischGespraechsvorschlag = splitRes[5];
+
+    console.log("Deutsche Übersetzung:", deutschUebersetzung);
+    console.log("Italienische Übersetzung:", italienischUebersetzung);
+    console.log("Antwortvorschlag auf Deutsch:", deutschVorschlag);
+    console.log("Antwortvorschlag auf Italienisch:", italienischVorschlag);
+    console.log("Vorschlag für Gesprächsweiterführung auf Deutsch:", deutschGespraechsvorschlag);
+    console.log("Vorschlag für Gesprächsweiterführung auf Italienisch:", italienischGespraechsvorschlag);
+
+    await displayRawRizz(
+      `Deutsche Übersetzung: ${deutschUebersetzung}\n` +
+      `Italienische Übersetzung: ${italienischUebersetzung}\n` +
+      `Antwortvorschlag auf Deutsch: ${deutschVorschlag}\n` +
+      `Antwortvorschlag auf Italienisch: ${italienischVorschlag}\n` +
+      `Vorschlag für Gesprächsweiterführung auf Deutsch: ${deutschGespraechsvorschlag}\n` +
+      `Vorschlag für Gesprächsweiterführung auf Italienisch: ${italienischGespraechsvorschlag}`
+    );
   };
 
   useEffect(() => {
