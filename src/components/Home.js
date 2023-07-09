@@ -17,25 +17,30 @@ const Home = () => {
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN);
   const [chatGptResponse, setChatGptResponse] = useState("");
   const [typingIndex, setTypingIndex] = useState(0);
+  const [translationDirection, setTranslationDirection] = useState("de-it");
 
   const { startRecording, stopRecording, transcript } = useWhisper({
     apiKey: apiKey,
     streaming: true,
     timeSlice: 500,
     whisperConfig: {
-      language: "de",
+      language: translationDirection === "de-it" ? "de" : "it",
     },
   });
 
   const fetchGpt = async () => {
     const userPrompt = window.transcript;
-    const systemPrompt = `
+    const systemPrompt = translationDirection === "de-it"
+      ? `
+          Du bist ein Sprachübersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
+          Du machst auch Vorschläge, 
+          um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweils immer auf deutsch und italienisch.
+        `
+      : `
+          Sei un traduttore vocale che traduce ogni input direttamente da italiano a tedesco e viceversa.
+          Fai anche suggerimenti per rispondere a una domanda o come continuare la conversazione, sia in tedesco che in italiano.
+        `;
 
-		Du bist ein Sprachübersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
-		Du machst auch Vorschläge, 
-		um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweils immer auf deutsch und italienisch.
-
-    `;
     const response = await fetch(`https://api.openai.com/v1/completions`, {
       body: JSON.stringify({
         model: "text-davinci-003",
@@ -106,6 +111,9 @@ const Home = () => {
             <Button onClick={onRecord}>
               {isRecording ? "Stop recording" : "Start recording"}
             </Button>
+            <Button onClick={toggleTranslationDirection}>
+              {translationDirection === "de-it" ? "DE > IT" : "IT > DE"}
+            </Button>
             <Button onClick={fetchGpt}>Get response</Button>
           </div>
         </div>
@@ -170,6 +178,12 @@ const Home = () => {
     if (msg === "Connected") {
       setConnected(true);
     }
+  }
+
+  function toggleTranslationDirection() {
+    setTranslationDirection(
+      translationDirection === "de-it" ? "it-de" : "de-it"
+    );
   }
 };
 
