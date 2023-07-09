@@ -96,11 +96,7 @@ const Home = () => {
             onClick={async () => {
               await ensureConnected(logger, relayCallback);
               app.run(execMonocle);
-              const res = await fetchGpt();
-              if (res) {
-                setChatGptResponse(res);
-                await displayRawRizz(res);
-              }
+              await displayRawRizz();
             }}
             style={{ marginTop: "10px" }}
           >
@@ -111,16 +107,6 @@ const Home = () => {
               {isRecording ? "Stop recording" : "Start recording"}
             </Button>
             <Button onClick={fetchGpt}>Get response</Button>
-          </div>
-          <div>
-            <label>
-              ChatGPT:
-              <textarea
-                style={{ width: "800px", height: "200px" }}
-                value={chatGptResponse.substring(0, typingIndex)}
-                readOnly
-              />
-            </label>
           </div>
         </div>
       </main>
