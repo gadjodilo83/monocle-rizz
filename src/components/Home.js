@@ -31,22 +31,23 @@ const Home = () => {
     const userPrompt = window.transcript;
     const systemPrompt = `
 
-      Du bist ein Sprachübersetzer und übersetzt jeden Input direkt ins Deutsche und ins Italienische. 
-      Du machst auch Vorschläge, um auf Fragen zu antworten oder das Gespräch weiterzuführen, jeweils auf Deutsch und Italienisch.
+		Du bist ein Sprachübersetzer und übersetzte jeden Input direkt in Deutsch und auf Italienisch. 
+		Du machst auch Vorschläge, 
+		um auf eine Frage eine Antwort zu geben oder wie man das Gespräch weiterführen könnte und dies jeweils immer auf deutsch und italienisch.
 
     `;
-    const response = await fetch(`https://api.openai.com/v1/engines/davinci-codex/completions`, {
+    const response = await fetch(`https://api.openai.com/v1/completions`, {
       body: JSON.stringify({
+        model: "text-davinci-003",
         prompt:
           systemPrompt +
           "\ntranscript: " +
           userPrompt +
-          "\nÜbersetzung auf Deutsch und Italienisch: ",
+          "\nÜbersetzung auf deutsch und italienisch: ",
         temperature: 0.7,
         max_tokens: 512,
         frequency_penalty: 0,
         presence_penalty: 0,
-        n: 1,
       }),
       headers: {
         Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_TOKEN}`,
@@ -58,7 +59,6 @@ const Home = () => {
     const resJson = await response.json();
     const res = resJson?.choices?.[0]?.text;
     if (!res) return;
-    setChatGptResponse(res);
     await displayRawRizz(res);
   };
 
@@ -71,75 +71,6 @@ const Home = () => {
 
     return () => clearInterval(typingTimer);
   }, [chatGptResponse, typingIndex]);
-
-  useEffect(() => {
-    // Sync the window variable and the transcript
-    window.transcript = transcript.text;
-  }, [transcript.text]);
-
-  const connect = async () => {
-    await ensureConnected(logger, relayCallback);
-    app.run(execMonocle);
-  };
-
-  const onRecord = () => {
-    isRecording ? stopRecording() : startRecording();
-    setIsRecording(!isRecording);
-  };
-
-  async function displayRawRizz(rizz) {
-    await replRawMode(true);
-    await displayRizz(rizz);
-  }
-
-  async function displayRizz(rizz) {
-    if (!rizz) return;
-    const splitText = wrapText(rizz);
-    let replCmd = "import display;";
-
-    for (let i = 0; i < splitText.length; i++) {
-      replCmd += `display.text("${splitText[i]}", 0, ${i * 50}, 0xffffff);`;
-    }
-
-    replCmd += "display.show();";
-
-    console.log("**** replCmd ****", replCmd);
-
-    await replSend(replCmd);
-  }
-
-  function wrapText(inputText) {
-    const block = 30;
-    let text = [];
-    for (let i = 0; i < 6; i++) {
-      text.push(
-        inputText.substring(block * i, block * (i + 1)).replace("\n", "")
-      );
-    }
-
-    return text;
-  }
-
-  function logger(msg) {
-    if (msg === "Connected") {
-      setConnected(true);
-    }
-  }
-
-  function relayCallback(msg) {
-    if (!msg) {
-      return;
-    }
-    if (msg.trim() === "trigger b") {
-      // Left btn
-      // fetchGpt();
-    }
-
-    if (msg.trim() === "trigger a") {
-      // Right btn
-      // onRecord();
-    }
-  }
 
   return (
     <>
@@ -162,7 +93,11 @@ const Home = () => {
           />
           <Button
             type="primary"
-            onClick={connect}
+            onClick={async () => {
+              await ensureConnected(logger, relayCallback);
+              app.run(execMonocle);
+              await displayRawRizz();
+            }}
             style={{ marginTop: "10px" }}
           >
             Connect
@@ -173,20 +108,69 @@ const Home = () => {
             </Button>
             <Button onClick={fetchGpt}>Get response</Button>
           </div>
-          <div>
-            <label>
-              ChatGPT:
-              <textarea
-                style={{ width: "800px", height: "200px" }}
-                value={chatGptResponse.substring(0, typingIndex)}
-                readOnly
-              />
-            </label>
-          </div>
         </div>
       </main>
     </>
   );
+
+  function relayCallback(msg) {
+    if (!msg) {
+      return;
+    }
+    if (msg.trim() === "trigger b") {
+      // Left btn
+      // fetchGpt();
+    }
+
+    if (msg.trim() === "trigger a") {
+      // Right btn
+      // onRecord();
+    }
+  }
+
+  function onRecord() {
+    isRecording ? stopRecording() : startRecording();
+    setIsRecording(!isRecording);
+  }
+
+  function wrapText(inputText) {
+    const block = 30;
+    let text = [];
+    for (let i = 0; i < 6; i++) {
+      text.push(
+        inputText.substring(block * i, block * (i + 1)).replace("\n", "")
+      );
+    }
+
+    return text;
+  }
+
+  async function displayRizz(rizz) {
+    if (!rizz) return;
+    const splitText = wrapText(rizz);
+    let replCmd = "import display;";
+
+    for (let i = 0; i < splitText.length; i++) {
+      replCmd += `display.text("${splitText[i]}", 0, ${i * 50}, 0xffffff);`;
+    }
+
+    replCmd += "display.show();";
+
+    console.log("**** replCmd ****", replCmd);
+
+    await replSend(replCmd);
+  }
+
+  async function displayRawRizz(rizz) {
+    await replRawMode(true);
+    await displayRizz(rizz);
+  }
+
+  async function logger(msg) {
+    if (msg === "Connected") {
+      setConnected(true);
+    }
+  }
 };
 
 export default Home;
