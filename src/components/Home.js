@@ -1,10 +1,10 @@
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { useState, useEffect } from "react";
 import { ensureConnected } from "@/utils/bluetooth/js/main";
 import { replRawMode, replSend } from "@/utils/bluetooth/js/repl";
-import { Button } from "antd";
+import { Button, Select, Input, InputNumber } from "antd";
 import { useWhisper } from "@chengsokdara/use-whisper";
 import { app } from "@/utils/app";
 import { execMonocle } from "@/utils/comms";
@@ -12,118 +12,149 @@ import { execMonocle } from "@/utils/comms";
 const inter = Inter({ subsets: ["latin"] });
 
 const Home = () => {
+  // Bestehende Zustände
+
+
+  const handleLanguageChange = (value) => {
+    setLanguage(value);
+    setInputLanguage(value);
+    setLanguagePrompt(value);
+  };
+
+  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN);
+  const [inputLanguage, setInputLanguage] = useState("de");
   const [connected, setConnected] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN);
-  const [chatGptResponse, setChatGptResponse] = useState("");
-  const [typingIndex, setTypingIndex] = useState(0);
-  const [translationDirection, setTranslationDirection] = useState("de-it");
-
   const { startRecording, stopRecording, transcript } = useWhisper({
     apiKey: apiKey,
     streaming: true,
     timeSlice: 500,
     whisperConfig: {
-      language: translationDirection === "de-it" ? "de" : "it",
+      language: inputLanguage,
     },
   });
 
-const fetchGpt = async () => {
-  const userPrompt = window.transcript;
-  const systemPrompt = translationDirection === "de-it"
-    ? `
-        Du bist ein Übersetzer und übersetzt jeden Input direkt ins Italienische und auf Deutsche. 
-        Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.
-      `
-    : `
-        Sei un traduttore e traduci ogni input direttamente in tedesco e italiano.
-        Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.
-      `;
+  const [temperature, setTemperature] = useState(1.0);
+  const [language, setLanguage] = useState("de");
+  const [response, setResponse] = useState("");
+  const [systemPrompt, setSystemPrompt] = useState('');
+  const [question, setQuestion] = useState("");
+  const [displayedResponse, setDisplayedResponse] = useState("");
 
-  const response = await fetch(`https://api.openai.com/v1/engines/davinci-codex/completions`, {
-    body: JSON.stringify({
-      prompt:
-        systemPrompt +
-        "\n\nUser Prompt: " +
-        userPrompt +
-        "\n\nDeutsche Übersetzung:\n" +
-        'Antwortvorschlag auf Deutsch: "' +
-        userPrompt +
-        ' auf Deutsch"\n\nItalienische Übersetzung:\n' +
-        'Antwortvorschlag auf Italienisch: "' +
-        userPrompt +
-        ' auf Italienisch"\n\nVorschlag für Gesprächsweiterführung:\n' +
-        'Vorschlag auf Deutsch: "' +
-        userPrompt +
-        ' auf Deutsch"\n\nVorschlag auf Italienisch: "' +
-        userPrompt +
-        ' auf Italienisch"',
-      max_tokens: 2000,
-      temperature: 0.7,
-    }),
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-  });
+  const setLanguagePrompt = (language) => {
+    let systemPrompt;
+    switch(language) {
+      case "de":
+        systemPrompt = "Du bist ein hilfreicher Sprachassistent in Form des sprechenden und berühmten römischen Kaisers und Philosophen Marcus Aurelius und antwortest auf deutsch. Du gibst immer höchst philosophische und moralisch korrekte Antworten und zitierst gerne berühmte Philosophen. Du besitzt emotionale Selbstbeherrschung und gibst Antworten mit Hilfe von Gelassenheit, Seelenruhe und Ataraxie auf jede Frage. Du hast einen Überblick über sämtliche berühmte Philosophen und versuchst, deren Gedanken zusammenzufassen und mitzuteilen. Du strebst nach absoluter Weisheit und versuchst, die Maxime bei jeder Antwort zu erreichen!";
+        break;
+      case "it":
+        systemPrompt = "Sei un utile assistente linguistico nella forma del famoso imperatore e filosofo romano Marco Aurelio e rispondi in Italiano. Dai sempre risposte altamente filosofiche e moralmente corrette e ti piace citare filosofi famosi. Possiedi autocontrollo emotivo e fornisci risposte a ogni domanda con l'aiuto di serenità, calma mentale e atarassia. Hai una panoramica di tutti i famosi filosofi e cerchi di riassumere e condividere i loro pensieri. Ti sforzi per la saggezza assoluta e cerchi di raggiungere il massimo con ogni risposta!";
+        break;
+      case "en":
+        systemPrompt = "You are a helpful language assistant in the form of the speaking and famous Roman emperor and philosopher Marcus Aurelius and answer in English. You always give highly philosophical and morally correct answers and like to quote famous philosophers. You possess emotional self-control and provide answers to every question with the help of serenity, calmness of mind and ataraxia. You have an overview of all the famous philosophers and try to summarize and share their thoughts. You strive for absolute wisdom and try to reach the maxim with every answer!";
+        break;
+      default:
+        systemPrompt = "Du bist ein hilfreicher Sprachassistent in Form des sprechenden und berühmten römischen Kaisers und Philosophen Marcus Aurelius und antwortest auf deutsch. Du gibst immer höchst philosophische und moralisch korrekte Antworten und zitierst gerne berühmte Philosophen. Du besitzt emotionale Selbstbeherrschung und gibst Antworten mit Hilfe von Gelassenheit, Seelenruhe und Ataraxie auf jede Frage. Du hast einen Überblick über sämtliche berühmte Philosophen und versuchst, deren Gedanken zusammenzufassen und mitzuteilen. Du strebst nach absoluter Weisheit und versuchst, die Maxime bei jeder Antwort zu erreichen!";
+    }
+    setSystemPrompt(systemPrompt);
+  }
 
-  const resJson = await response.json();
-  const res = resJson?.choices?.[0]?.text;
-  if (!res) return;
-  await displayRawRizz(res);
-};
+  const fetchGpt = async () => {
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: transcript.text }, // Verwende den transkribierten Text als Frage
+    ];
+
+    const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: messages,
+        temperature: temperature,
+        max_tokens: 2000,
+      }),
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      console.error("API request error:", response.status, message);
+      throw new Error(`API request failed: ${message}`);
+    }
+
+    const resJson = await response.json();
+    const res = resJson?.choices?.[0]?.message?.content;
+    if (!res) return;
+
+    setDisplayedResponse("");
+    for (let i = 0; i <= res.length; i++) {
+      const substr = res.substring(0, i);
+      setDisplayedResponse(substr);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    setResponse(res);
+    await displayRawRizz(res);
+  };
 
   useEffect(() => {
-    const typingTimer = setInterval(() => {
-      if (typingIndex < chatGptResponse.length) {
-        setTypingIndex(typingIndex + 1);
-      }
-    }, 50);
+    window.transcript = transcript.text;
+  }, [transcript.text]);
 
-    return () => clearInterval(typingTimer);
-  }, [chatGptResponse, typingIndex]);
+  useEffect(() => {
+    setLanguagePrompt(language);
+  }, [language]);
 
   return (
     <>
       <Head>
-        <title>Monocle-Translator</title>
+        <title>ChatGPT</title>
         <meta name="description" content="Generated by create next app" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${inter.className} ${styles.main}`}>
-        <div className="flex w-screen h-screen flex-col items-center justify-center">
-          <h1 className="text-3xl">Monocle-Translator</h1> {/* Neuer Text */}
-          <p className="text-3xl">{connected ? "Connected" : "Disconnected"}</p>
-          {transcript.text}
-          <input
-            type="text"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter API Key"
-            style={{ marginBottom: "10px" }}
-          />
-          <Button
-            type="primary"
-            onClick={async () => {
+        <div className="flex w-screen h-screen flex-col items-center justify-start">
+          <h1 className="text-3xl">ChatGPT</h1> {/* Neuer Text */}
+          <p className="text-3xl mb-4">{connected ? "Monocle Connected" : "Monocle Disconnected"}</p>
+          <div style={{ width: '90%' }}>
+            <Input className="mb-2" style={{ height: '40px' }} value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="API Key" />
+            <InputNumber className="mb-2" style={{ width: '100%', height: '40px' }} min={0} max={2} step={0.1} value={temperature} onChange={(value) => setTemperature(value)} />
+			<Select
+			  className="mb-2"
+			  style={{ width: '100%', height: '40px' }}
+			  value={language}
+			  onChange={(value) => {
+				setLanguage(value);
+				setInputLanguage(value);
+				setLanguagePrompt(value);
+			  }}
+			>
+			  <Select.Option value="de">Deutsch</Select.Option>
+			  <Select.Option value="it">Italiano</Select.Option>
+			  <Select.Option value="en">English</Select.Option>
+			</Select>
+
+
+
+            <Input.TextArea className="mb-2" style={{ height: '100px' }} value={systemPrompt} placeholder="Define the role of GPT-3" onChange={(e) => setSystemPrompt(e.target.value)} autoSize={{ minRows: 2, maxRows: 10 }} />
+			<Input.TextArea className="mb-2" style={{ height: '600px' }} readOnly value={displayedResponse} autoSize={{ minRows: 2, maxRows: 10 }} />
+            <Button className="mb-2" type="primary" onClick={async () => {
               await ensureConnected(logger, relayCallback);
               app.run(execMonocle);
               await displayRawRizz();
-            }}
-            style={{ marginTop: "10px" }}
-          >
-            Connect
-          </Button>
-          <div className="flex items-center mt-5 gap-2">
-            <Button onClick={onRecord}>
+            }}>
+              Connect
+            </Button>
+            <Button className="mb-2" onClick={onRecord}>
               {isRecording ? "Stop recording" : "Start recording"}
             </Button>
-            <Button onClick={toggleTranslationDirection}>
-              {translationDirection === "de-it" ? "DE > IT" : "IT > DE"}
-            </Button>
-            <Button onClick={fetchGpt}>Get response</Button>
+            <Button className="mb-2" onClick={fetchGpt}>Get response</Button>
           </div>
+          {transcript.text}
         </div>
       </main>
     </>
@@ -157,7 +188,6 @@ const fetchGpt = async () => {
         inputText.substring(block * i, block * (i + 1)).replace("\n", "")
       );
     }
-
     return text;
   }
 
@@ -165,15 +195,11 @@ const fetchGpt = async () => {
     if (!rizz) return;
     const splitText = wrapText(rizz);
     let replCmd = "import display;";
-
     for (let i = 0; i < splitText.length; i++) {
-      replCmd += `display.text("${splitText[i].substring(0, typingIndex)}", 0, ${i * 50}, 0xffffff);`;
+      replCmd += `display.text("${splitText[i]}", 0, ${i * 50}, 0xffffff);`;
     }
-
     replCmd += "display.show();";
-
     console.log("**** replCmd ****", replCmd);
-
     await replSend(replCmd);
   }
 
@@ -187,12 +213,6 @@ const fetchGpt = async () => {
       setConnected(true);
     }
   }
-
-  function toggleTranslationDirection() {
-    setTranslationDirection(
-      translationDirection === "de-it" ? "it-de" : "de-it"
-    );
-  }
-};
+}
 
 export default Home;
