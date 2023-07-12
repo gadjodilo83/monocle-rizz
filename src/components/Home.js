@@ -45,7 +45,7 @@ const Home = () => {
     let systemPrompt;
     switch(language) {
       case "de":
-        systemPrompt = "Du bist ein Übersetzer und übersetzt jeden Input direkt ins Italienische und auf Deutsche. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+        systemPrompt = "Du bist ein Übersetzer und übersetzt jeden Input direkt auf Italienisch und auf Deutsch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
         break;
       case "it":
         systemPrompt = "Sei un traduttore e traduci ogni input direttamente in tedesco e italiano. Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.";
