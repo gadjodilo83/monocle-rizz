@@ -43,19 +43,19 @@ const Home = () => {
     switch (language) {
       case "de":
         systemPrompt =
-        "Du bist ein Übersetzer und übersetzt jeden Input direkt auf Italienisch und auf Deutsch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+          "Du bist ein Übersetzer und übersetzt jeden Input direkt auf Italienisch und auf Deutsch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
         break;
       case "it":
         systemPrompt =
-        "Sei un traduttore e traduci ogni input direttamente in tedesco e italiano. Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.";
+          "Sei un traduttore e traduci ogni input direttamente in tedesco e italiano. Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.";
         break;
       case "en":
         systemPrompt =
-        "You are a translator and translate any input directly into Italian and German. You also give suggestions on how to answer questions or how to continue the conversation, both in German and Italian.";
+          "You are a translator and translate any input directly into Italian and German. You also give suggestions on how to answer questions or how to continue the conversation, both in German and Italian.";
         break;
       default:
         systemPrompt =
-        "Du bist ein Übersetzer und übersetzt jeden Input direkt ins Italienische und auf Deutsche. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+          "Du bist ein Übersetzer und übersetzt jeden Input direkt ins Italienische und auf Deutsche. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
     }
     setSystemPrompt(systemPrompt);
   };
@@ -208,34 +208,31 @@ const Home = () => {
     return cleanedText;
   }
 
-async function displayRizz(rizz) {
-  if (!rizz) return;
-  await clearDisplay(); // Display löschen
-  const splitText = wrapText(rizz);
-  let replCmd = "import display\n";
-  let textObjects = [];
-  for (let i = 0; i < splitText.length; i++) {
-    const textObjectName = `t${i}`;
-    const text = splitText[i].replace(/"/g, "");
-    const xCoordinate = 0; // Beispielwert für die x-Koordinate
-    const yCoordinate = i * 50;
-    const textCmd = `${textObjectName} = display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)\n`;
-    replCmd += textCmd;
-    textObjects.push(textObjectName);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  async function displayRizz(rizz) {
+    if (!rizz) return;
+    await clearDisplay(); // Display löschen
+    const splitText = wrapText(rizz);
+    let replCmd = "import display\n";
+    let textObjects = [];
+    for (let i = 0; i < splitText.length; i++) {
+      const textObjectName = `t${i}`;
+      const text = splitText[i].replace(/"/g, "");
+      const xCoordinate = 0; // Beispielwert für die x-Koordinate
+      const yCoordinate = i * 50;
+      const textCmd = `display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
+      replCmd += `display.show(${textCmd})\n`;
+      textObjects.push(textObjectName);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    console.log("**** replCmd ****", replCmd);
+    await replSend(replCmd);
   }
-  const showCmd = `display.show(${textObjects.join(", ")})\n`;
-  replCmd += showCmd;
-  console.log("**** replCmd ****", replCmd);
-  await replSend(replCmd);
-}
 
-async function clearDisplay() {
-  let replCmd = "import display\n";
-  replCmd += "display.clear()\n";
-  await replSend(replCmd);
-}
-
+  async function clearDisplay() {
+    let replCmd = "import display\n";
+    replCmd += "display.clear()\n";
+    await replSend(replCmd);
+  }
 
   async function logger(msg) {
     if (msg === "Connected") {
@@ -259,12 +256,6 @@ async function clearDisplay() {
     }
 
     return text;
-  }
-
-  async function clearDisplay() {
-    let replCmd = "import display\n";
-    replCmd += "display.clear()\n";
-    await replSend(replCmd);
   }
 };
 
