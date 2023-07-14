@@ -208,28 +208,27 @@ const Home = () => {
     return cleanedText;
   }
 
-  async function displayRizz(rizz) {
-    if (!rizz) return;
-    await clearDisplay(); // Display löschen
-    const splitText = wrapText(rizz);
-    let replCmd = "import display\n";
-    let textObjects = [];
-    for (let i = 0; i < splitText.length; i++) {
-      const textObjectName = `t${i}`;
-      const text = splitText[i].replace(/"/g, "");
-      const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = i * 50;
-      // const yCoordinate = 0; // Beispielwert für die y-Koordinate
-      const textCmd = `${textObjectName} = display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)\n`;
-      replCmd += textCmd;
-      textObjects.push(textObjectName);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-    const showCmd = `display.show(${textObjects.join(", ")})\n`;
-    replCmd += showCmd;
-    console.log("**** replCmd ****", replCmd);
-    await replSend(replCmd);
+async function displayRizz(rizz) {
+  if (!rizz) return;
+  await clearDisplay(); // Display löschen
+  const splitText = wrapText(rizz);
+  let replCmd = "import display\n";
+  let textObjects = [];
+  for (let i = 0; i < splitText.length; i++) {
+    const textObjectName = `t${i}`;
+    const text = splitText[i].replace(/"/g, "");
+    const xCoordinate = 0; // Beispielwert für die x-Koordinate
+    const yCoordinate = i * 50;
+    const textCmd = `${textObjectName} = display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)\n`;
+    replCmd += textCmd;
+    textObjects.push(textObjectName);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
+  const showCmd = `display.show(${textObjects.join(", ")})\n`;
+  replCmd += showCmd;
+  console.log("**** replCmd ****", replCmd);
+  await replSend(replCmd);
+}
 
   async function logger(msg) {
     if (msg === "Connected") {
