@@ -41,7 +41,7 @@ const Home = () => {
           userPrompt +
           "\noptimal interviewee's response: ",
         temperature: 0.7,
-        max_tokens: 512,
+        max_tokens: 10,
         frequency_penalty: 0,
         presence_penalty: 0,
       }),
