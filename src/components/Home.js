@@ -208,25 +208,29 @@ const Home = () => {
     return cleanedText;
   }
 
-  async function displayRizz(rizz) {
-    if (!rizz) return;
-    await clearDisplay(); // Display löschen
-    const splitText = wrapText(rizz);
-    let replCmd = "import display\n";
-    let textObjects = [];
-    for (let i = 0; i < splitText.length; i++) {
-      const textObjectName = `t${i}`;
-      const text = splitText[i].replace(/"/g, "");
-      const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = i * 50;
-      const textCmd = `display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
-      replCmd += `display.show(${textCmd})\n`;
-      textObjects.push(textObjectName);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-    console.log("**** replCmd ****", replCmd);
-    await replSend(replCmd);
+ async function displayRizz(rizz) {
+  if (!rizz) return;
+  await clearDisplay(); // Display löschen
+  const splitText = wrapText(rizz);
+  let replCmd = "import display\n";
+  for (let i = 0; i < splitText.length; i++) {
+    const text = cleanText(splitText[i].replace(/"/g, ""));
+    const xCoordinate = 0; // Beispielwert für die x-Koordinate
+    const yCoordinate = i * 50;
+    const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
+    replCmd += textCmd;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
+  console.log("**** replCmd ****", replCmd);
+  await replSend(replCmd);
+}
+
+function cleanText(inputText) {
+  let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
+  cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
+  cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
+  return cleanedText;
+}
 
   async function clearDisplay() {
     let replCmd = "import display\n";
