@@ -71,7 +71,7 @@ const Home = () => {
         model: "gpt-3.5-turbo",
         messages: messages,
         temperature: temperature,
-        max_tokens: 50,
+        max_tokens: 100,
       }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -208,18 +208,18 @@ const Home = () => {
     return cleanedText;
   }
 
-  async function displayRizz(rizz) {
-    if (!rizz) return;
-    const splitText = wrapText(rizz);
-    for (let i = 0; i < splitText.length; i++) {
-      const text = cleanText(splitText[i].replace(/"/g, ""));
-      const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = i * 50;
-      const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
-      await delay(1000); // 1 Sekunde warten
-      await replSend(textCmd); // display.show senden
-    }
-  }
+	async function displayRizz(rizz) {
+	  if (!rizz) return;
+	  const splitText = wrapText(rizz);
+	  for (let i = 0; i < splitText.length; i++) {
+		const text = cleanText(splitText[i].replace(/"/g, ""));
+		const xCoordinate = 0; // Beispielwert für die x-Koordinate
+		const yCoordinate = i * 0;
+		const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
+		await delay(1000); // 1 Sekunde warten
+		await replSend(textCmd); // display.show senden
+	  }
+	}
 
   async function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -240,7 +240,7 @@ const Home = () => {
     while (currentIndex < inputText.length) {
       const substring = inputText.substring(currentIndex, currentIndex + block);
       const match = substring.match(regex);
-      const endIndex = match ? currentIndex + match.index + 10 : currentIndex + block;
+      const endIndex = match ? currentIndex + match.index + 15 : currentIndex + block;
       const wrappedSubstring = inputText.substring(currentIndex, endIndex);
       text.push(wrappedSubstring);
       currentIndex = endIndex;
