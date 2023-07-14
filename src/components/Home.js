@@ -208,9 +208,13 @@ const Home = () => {
     return cleanedText;
   }
 
+async function clearDisplay() {
+  let replCmd = "import display\n";
+  await replSend(replCmd);
+}
+
 async function displayRizz(rizz) {
   if (!rizz) return;
-  await clearDisplay(); // Display löschen
   const splitText = wrapText(rizz);
   let replCmd = "import display\n";
   for (let i = 0; i < splitText.length; i++) {
