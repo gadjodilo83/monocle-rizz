@@ -237,15 +237,23 @@ async function displayRizz(rizz) {
     }
   }
 
-  function wrapText(inputText) {
-    const block = 20;
-    let text = [];
-    for (let i = 0; i < Math.ceil(inputText.length / block); i++) {
-      text.push(inputText.substring(block * i, block * (i + 1)));
-    }
-    return text;
+function wrapText(inputText) {
+  const block = 25;
+  const regex = /0xffffff\)(?!$)/g; // Negative Lookahead regex to match "0xffffff)" not at the end of the string
+  let text = [];
+  let currentIndex = 0;
+
+  while (currentIndex < inputText.length) {
+    const substring = inputText.substring(currentIndex, currentIndex + block);
+    const match = substring.match(regex);
+    const endIndex = match ? currentIndex + match.index + 10 : currentIndex + block;
+    const wrappedSubstring = inputText.substring(currentIndex, endIndex);
+    text.push(wrappedSubstring);
+    currentIndex = endIndex;
   }
-};
+
+  return text;
+}
 
 async function clearDisplay() {
   let replCmd = "import display\n";
