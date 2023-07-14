@@ -230,6 +230,12 @@ async function displayRizz(rizz) {
   await replSend(replCmd);
 }
 
+async function clearDisplay() {
+  let replCmd = "import display\n";
+  replCmd += "display.clear()\n";
+  await replSend(replCmd);
+}
+
 
   async function logger(msg) {
     if (msg === "Connected") {
