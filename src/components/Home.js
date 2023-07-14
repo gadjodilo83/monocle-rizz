@@ -208,7 +208,7 @@ const Home = () => {
     return cleanedText;
   }
 
- async function displayRizz(rizz) {
+async function displayRizz(rizz) {
   if (!rizz) return;
   await clearDisplay(); // Display löschen
   const splitText = wrapText(rizz);
@@ -219,10 +219,14 @@ const Home = () => {
     const yCoordinate = i * 50;
     const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
     replCmd += textCmd;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await delay(1000); // 1 Sekunde warten
   }
   console.log("**** replCmd ****", replCmd);
   await replSend(replCmd);
+}
+
+async function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function cleanText(inputText) {
