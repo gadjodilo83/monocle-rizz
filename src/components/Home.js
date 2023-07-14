@@ -220,9 +220,9 @@ async function displayRizz(rizz) {
     const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
     replCmd += textCmd;
     await delay(1000); // 1 Sekunde warten
+    await replSend(textCmd); // display.show senden
   }
   console.log("**** replCmd ****", replCmd);
-  await replSend(replCmd);
 }
 
 async function delay(ms) {
