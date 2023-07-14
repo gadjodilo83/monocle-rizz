@@ -237,7 +237,7 @@ async function displayRizz(rizz) {
   }
 
   function wrapText(inputText) {
-    const block = 25;
+    const block = 20;
     let text = [];
     for (let i = 0; i < Math.ceil(inputText.length / block); i++) {
       text.push(inputText.substring(block * i, block * (i + 1)));
