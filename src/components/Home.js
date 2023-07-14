@@ -204,6 +204,7 @@ const Home = () => {
 function cleanText(inputText) {
   let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
   cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
+  cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
   return cleanedText;
 }
 
