@@ -201,35 +201,35 @@ const Home = () => {
     await displayRizz(rizz);
   }
 
-function cleanText(inputText) {
-  let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
-  cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
-  cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
-  return cleanedText;
-}
-
-async function displayRizz(rizz) {
-  if (!rizz) return;
-  await clearDisplay(); // Display löschen
-  const splitText = wrapText(rizz);
-  let replCmd = "import display\n";
-  let textObjects = [];
-  for (let i = 0; i < splitText.length; i++) {
-    const textObjectName = `t${i}`;
-    const text = splitText[i].replace(/"/g, "");
-	const xCoordinate = 0; // Beispielwert für die x-Koordinate
-	const yCoordinate = i * 50;
-	// const yCoordinate = 0; // Beispielwert für die y-Koordinate
-    const textCmd = `${textObjectName} = display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)\n`;
-    replCmd += textCmd;
-    textObjects.push(textObjectName);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  function cleanText(inputText) {
+    let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
+    cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
+    cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
+    return cleanedText;
   }
-  const showCmd = `display.show(${textObjects.join(", ")})\n`;
-  replCmd += showCmd;
-  console.log("**** replCmd ****", replCmd);
-  await replSend(replCmd);
-}
+
+  async function displayRizz(rizz) {
+    if (!rizz) return;
+    await clearDisplay(); // Display löschen
+    const splitText = wrapText(rizz);
+    let replCmd = "import display\n";
+    let textObjects = [];
+    for (let i = 0; i < splitText.length; i++) {
+      const textObjectName = `t${i}`;
+      const text = splitText[i].replace(/"/g, "");
+      const xCoordinate = 0; // Beispielwert für die x-Koordinate
+      const yCoordinate = i * 50;
+      // const yCoordinate = 0; // Beispielwert für die y-Koordinate
+      const textCmd = `${textObjectName} = display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff)\n`;
+      replCmd += textCmd;
+      textObjects.push(textObjectName);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    const showCmd = `display.show(${textObjects.join(", ")})\n`;
+    replCmd += showCmd;
+    console.log("**** replCmd ****", replCmd);
+    await replSend(replCmd);
+  }
 
   async function logger(msg) {
     if (msg === "Connected") {
@@ -237,28 +237,29 @@ async function displayRizz(rizz) {
     }
   }
 
-function wrapText(inputText) {
-  const block = 25;
-  const regex = /0xffffff\)(?!$)/g; // Negative Lookahead regex to match "0xffffff)" not at the end of the string
-  let text = [];
-  let currentIndex = 0;
+  function wrapText(inputText) {
+    const block = 25;
+    const regex = /0xffffff\)(?!$)/g; // Negative Lookahead regex to match "0xffffff)" not at the end of the string
+    let text = [];
+    let currentIndex = 0;
 
-  while (currentIndex < inputText.length) {
-    const substring = inputText.substring(currentIndex, currentIndex + block);
-    const match = substring.match(regex);
-    const endIndex = match ? currentIndex + match.index + 10 : currentIndex + block;
-    const wrappedSubstring = inputText.substring(currentIndex, endIndex);
-    text.push(wrappedSubstring);
-    currentIndex = endIndex;
+    while (currentIndex < inputText.length) {
+      const substring = inputText.substring(currentIndex, currentIndex + block);
+      const match = substring.match(regex);
+      const endIndex = match ? currentIndex + match.index + 10 : currentIndex + block;
+      const wrappedSubstring = inputText.substring(currentIndex, endIndex);
+      text.push(wrappedSubstring);
+      currentIndex = endIndex;
+    }
+
+    return text;
   }
 
-  return text;
-}
-
-async function clearDisplay() {
-  let replCmd = "import display\n";
-  replCmd += "display.clear()\n";
-  await replSend(replCmd);
-}
+  async function clearDisplay() {
+    let replCmd = "import display\n";
+    replCmd += "display.clear()\n";
+    await replSend(replCmd);
+  }
+};
 
 export default Home;
