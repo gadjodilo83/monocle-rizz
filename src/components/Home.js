@@ -31,7 +31,7 @@ const Home = () => {
     },
   });
 
-  const [temperature, setTemperature] = useState(0.1);
+  const [temperature, setTemperature] = useState(0.6);
   const [language, setLanguage] = useState("de");
   const [response, setResponse] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -216,7 +216,7 @@ const Home = () => {
 		const xCoordinate = 0; // Beispielwert für die x-Koordinate
 		const yCoordinate = i * 0;
 		const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
-		await delay(1000); // 1 Sekunde warten
+		await delay(2000); // 1 Sekunde warten
 		await replSend(textCmd); // display.show senden
 	  }
 	}
@@ -240,7 +240,7 @@ const Home = () => {
     while (currentIndex < inputText.length) {
       const substring = inputText.substring(currentIndex, currentIndex + block);
       const match = substring.match(regex);
-      const endIndex = match ? currentIndex + match.index + 15 : currentIndex + block;
+      const endIndex = match ? currentIndex + match.index + 20 : currentIndex + block;
       const wrappedSubstring = inputText.substring(currentIndex, endIndex);
       text.push(wrappedSubstring);
       currentIndex = endIndex;
