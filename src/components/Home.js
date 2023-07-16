@@ -211,7 +211,7 @@ async function displayRizz(rizz) {
     const group = splitText.slice(i, i + groupSize);
     const textCmds = group.map((text, index) => {
       const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = index * 50; // Zeilen t1 bis t4
+      const yCoordinate = index * 60; // Zeilen t1 bis t4
       return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
     });
 
