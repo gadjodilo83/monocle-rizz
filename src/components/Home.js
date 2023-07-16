@@ -201,35 +201,52 @@ const Home = () => {
     await displayRizz(rizz);
   }
 
-  function cleanText(inputText) {
-    let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
-    cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
-    cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
-    return cleanedText;
-  }
+async function displayRizz(rizz) {
+  if (!rizz) return;
 
-	async function displayRizz(rizz) {
-	  if (!rizz) return;
-	  const splitText = wrapText(rizz);
-	  for (let i = 0; i < splitText.length; i++) {
-		const text = cleanText(splitText[i].replace(/"/g, ""));
-		const xCoordinate = 0; // Beispielwert für die x-Koordinate
-		const yCoordinate = i * 0;
-		const textCmd = `display.show(display.Text('${text}', ${xCoordinate}, ${yCoordinate}, 0xffffff))\n`;
-		await delay(2000); // 1 Sekunde warten
-		await replSend(textCmd); // display.show senden
+  const splitText = wrapText(rizz);
+  const groupSize = 4;
+
+  for (let i = 0; i < splitText.length; i += groupSize) {
+    const group = splitText.slice(i, i + groupSize);
+    const textCmds = group.map((text, index) => {
+      const xCoordinate = 0; // Beispielwert für die x-Koordinate
+      const yCoordinate = index * 50; // Zeilen t1 bis t4
+      return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
+    });
+
+    const textCmd = `display.show([${textCmds.join(", ")}])`;
+
+    await delay(2500); // 2.5 Sekunden warten
+    await replSend(`${textCmd}\n`); // display.show senden
+  }
+}
+
+function chunkArray(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
+
+	function cleanText(inputText) {
+	  let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
+	  cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
+	  cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
+	  return cleanedText;
+	}
+
+	async function delay(ms) {
+	  return new Promise((resolve) => setTimeout(resolve, ms));
+	}
+
+	async function logger(msg) {
+	  if (msg === "Connected") {
+		setConnected(true);
 	  }
 	}
 
-  async function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  async function logger(msg) {
-    if (msg === "Connected") {
-      setConnected(true);
-    }
-  }
 
   function wrapText(inputText) {
     const block = 25;
