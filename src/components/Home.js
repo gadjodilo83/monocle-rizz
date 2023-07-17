@@ -211,16 +211,18 @@ async function displayRizz(rizz) {
     const group = splitText.slice(i, i + groupSize);
     const textCmds = group.map((text, index) => {
       const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = index * 60; // Zeilen t1 bis t4
+      const yCoordinate = index * 50; // Zeilen t1 bis t4
       return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
     });
 
     const textCmd = `display.show([${textCmds.join(", ")}])`;
+    const clearCmd = "display.clear()";
 
-    await delay(6000); // 2.5 Sekunden warten
-    await replSend(`${textCmd}\n`); // display.show senden
+    await delay(3000); // 2.5 Sekunden warten
+    await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
   }
 }
+
 
 function chunkArray(array, size) {
   const result = [];
