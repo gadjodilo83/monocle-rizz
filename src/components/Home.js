@@ -31,7 +31,7 @@ const Home = () => {
     },
   });
 
-  const [temperature, setTemperature] = useState(0.6);
+  const [temperature, setTemperature] = useState(0.3);
   const [language, setLanguage] = useState("de");
   const [response, setResponse] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -218,7 +218,7 @@ async function displayRizz(rizz) {
     const textCmd = `display.show([${textCmds.join(", ")}])`;
     const clearCmd = "display.clear()";
 
-    await delay(3000); // 2.5 Sekunden warten
+    await delay(6000); // 2.5 Sekunden warten
     await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
   }
 }
