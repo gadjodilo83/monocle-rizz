@@ -71,7 +71,7 @@ const Home = () => {
         model: "gpt-3.5-turbo",
         messages: messages,
         temperature: temperature,
-        max_tokens: 100,
+        max_tokens: 250,
       }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -205,7 +205,7 @@ async function displayRizz(rizz) {
   if (!rizz) return;
 
   const splitText = wrapText(rizz);
-  const groupSize = 4;
+  const groupSize = 5;
 
   for (let i = 0; i < splitText.length; i += groupSize) {
     const group = splitText.slice(i, i + groupSize);
@@ -220,6 +220,8 @@ async function displayRizz(rizz) {
 
     await delay(6000); // 2.5 Sekunden warten
     await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
+	await delay(1000); // 2.5 Sekunden warten
+
   }
 }
 
