@@ -71,7 +71,7 @@ const Home = () => {
         model: "gpt-3.5-turbo",
         messages: messages,
         temperature: temperature,
-        max_tokens: 250,
+        max_tokens: 500,
       }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -218,7 +218,7 @@ async function displayRizz(rizz) {
     const textCmd = `display.show([${textCmds.join(", ")}])`;
     const clearCmd = "display.clear()";
 
-    await delay(6000); // 2.5 Sekunden warten
+    await delay(7000); // 2.5 Sekunden warten
     await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
 	await delay(1000); // 2.5 Sekunden warten
 
@@ -261,7 +261,7 @@ function chunkArray(array, size) {
     while (currentIndex < inputText.length) {
       const substring = inputText.substring(currentIndex, currentIndex + block);
       const match = substring.match(regex);
-      const endIndex = match ? currentIndex + match.index + 20 : currentIndex + block;
+      const endIndex = match ? currentIndex + match.index + 25 : currentIndex + block;
       const wrappedSubstring = inputText.substring(currentIndex, endIndex);
       text.push(wrappedSubstring);
       currentIndex = endIndex;
