@@ -43,7 +43,7 @@ const Home = () => {
     switch (language) {
       case "de":
         systemPrompt =
-          "Du bist ein Übersetzer und übersetzt jeden Input direkt auf Italienisch und auf Deutsch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+          "Du bist nur ein Übersetzer und übersetzt jeden alles direkt auf Italienisch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
         break;
       case "it":
         systemPrompt =
@@ -71,7 +71,7 @@ const Home = () => {
         model: "gpt-3.5-turbo",
         messages: messages,
         temperature: temperature,
-        max_tokens: 120,
+        max_tokens: 200,
       }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
