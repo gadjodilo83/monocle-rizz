@@ -55,7 +55,7 @@ const Home = () => {
         break;
       default:
         systemPrompt =
-          "Du bist ein Übersetzer und übersetzt jeden Input direkt ins Italienische und auf Deutsche. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+          "Du bist nur ein Übersetzer und übersetzt alles direkt auf Italienisch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
     }
     setSystemPrompt(systemPrompt);
   };
