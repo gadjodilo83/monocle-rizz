@@ -31,7 +31,7 @@ const Home = () => {
     },
   });
 
-  const [temperature, setTemperature] = useState(0.3);
+  const [temperature, setTemperature] = useState(0.5);
   const [language, setLanguage] = useState("de");
   const [response, setResponse] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -43,11 +43,11 @@ const Home = () => {
     switch (language) {
       case "de":
         systemPrompt =
-          "Du bist nur ein Übersetzer und übersetzt alles direkt auf Italienisch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+          "Du bist nur ein Übersetzer und übersetzt alles direkt auf Italienisch. Danach gibst du Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
         break;
       case "it":
         systemPrompt =
-          "Sei un traduttore e traduci ogni input direttamente in tedesco e italiano. Fornisci anche suggerimenti su come rispondere a una domanda o come proseguire la conversazione, sia in tedesco che in italiano.";
+          "Sei solo un traduttore e traduci tutto direttamente in tedesco. Poi dai suggerimenti su come rispondere alle domande o su come potrebbe continuare la conversazione, rispettivamente in tedesco e in italiano.";
         break;
       case "en":
         systemPrompt =
@@ -55,7 +55,7 @@ const Home = () => {
         break;
       default:
         systemPrompt =
-          "Du bist nur ein Übersetzer und übersetzt alles direkt auf Italienisch. Du gibst auch Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
+          "Du bist nur ein Übersetzer und übersetzt alles direkt auf Italienisch. Danach gibst du Vorschläge, wie auf Fragen geantwortet werden kann oder wie das Gespräch fortgesetzt werden könnte, jeweils auf Deutsch und Italienisch.";
     }
     setSystemPrompt(systemPrompt);
   };
@@ -71,7 +71,7 @@ const Home = () => {
         model: "gpt-3.5-turbo",
         messages: messages,
         temperature: temperature,
-        max_tokens: 200,
+        max_tokens: 400,
       }),
       headers: {
         Authorization: `Bearer ${apiKey}`,
