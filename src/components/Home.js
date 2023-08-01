@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
@@ -21,15 +21,79 @@ const Home = () => {
   const [apiKey, setApiKey] = useState(process.env.NEXT_PUBLIC_OPENAI_API_TOKEN);
   const [inputLanguage, setInputLanguage] = useState("de");
   const [connected, setConnected] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const { startRecording, stopRecording, transcript } = useWhisper({
-    apiKey: apiKey,
-    streaming: true,
-    timeSlice: 500,
-    whisperConfig: {
-      language: inputLanguage,
-    },
-  });
+  const [isRecordingState, setIsRecordingState] = useState(false);
+  const isRecording = useRef(isRecordingState);
+  const setIsRecording = (value) => {
+    isRecording.current = value;
+    setIsRecordingState(value);
+  };
+  const { startRecording: whisperStartRecording, stopRecording: whisperStopRecording, transcript } = useWhisper({
+		apiKey: apiKey,
+		streaming: true,
+		timeSlice: 500,
+		whisperConfig: {
+		  language: inputLanguage,
+		},
+	});
+
+
+
+const startMyRecording = async () => {
+  const textCmd = `display.Text('Start Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
+  const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
+  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+  whisperStartRecording();
+  setIsRecording(true);
+}
+
+
+const stopMyRecording = async () => {
+  const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
+  const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
+  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+    whisperStopRecording();
+    setIsRecording(false);
+    if (transcript.text) {
+      await fetchGpt();
+    } else {
+      console.log('No transcript available');
+    }
+}
+
+
+const relayCallback = (msg) => {
+  if (!msg) {
+    return;
+  }
+  if (msg.trim() === "trigger b") {
+    // Left btn
+    console.log("Button B pressed");  // New line
+    fetchGpt();
+  }
+
+  if (msg.trim() === "trigger a") {
+    // Right btn
+    if(isRecording.current) {
+        stopMyRecording();
+    } else {
+        startMyRecording();
+    }
+  }
+}
+
+const onRecord = () => {
+  if(isRecording.current) {
+    stopMyRecording();
+  } else {
+    startMyRecording();
+  }
+};
+
+
+
+
 
   const [temperature, setTemperature] = useState(0.5);
   const [language, setLanguage] = useState("de");
@@ -60,7 +124,9 @@ const Home = () => {
     setSystemPrompt(systemPrompt);
   };
 
-  const fetchGpt = async () => {
+const fetchGpt = async () => {
+  console.log("fetchGpt called");
+  try {
     const messages = [
       { role: "system", content: systemPrompt },
       { role: "user", content: transcript.text }, // Verwende den transkribierten Text als Frage
@@ -93,7 +159,19 @@ const Home = () => {
     setDisplayedResponse(res);
     setResponse(res);
     await displayRawRizz(res);
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+
+useEffect(() => {
+    if (!isRecording.current && transcript.text) {
+        fetchGpt();
+    }
+}, [transcript.text]);
+
 
   useEffect(() => {
     window.transcript = transcript.text;
@@ -176,25 +254,8 @@ const Home = () => {
     </>
   );
 
-  function relayCallback(msg) {
-    if (!msg) {
-      return;
-    }
-    if (msg.trim() === "trigger b") {
-      // Left btn
-      // fetchGpt();
-    }
 
-    if (msg.trim() === "trigger a") {
-      // Right btn
-      // onRecord();
-    }
-  }
 
-  function onRecord() {
-    isRecording ? stopRecording() : startRecording();
-    setIsRecording(!isRecording);
-  }
 
   async function displayRawRizz(rizz) {
     await replRawMode(true);
