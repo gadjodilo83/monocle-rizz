@@ -38,28 +38,29 @@ const Home = () => {
 
 
 
-const startMyRecording = useCallback(async () => {
+const startMyRecording = async () => {
   const textCmd = `display.Text('Start Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
   const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
   const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
   whisperStartRecording();
   setIsRecording(true);
-}, [displayRawRizz, whisperStartRecording]);  // whisperStartRecording hinzugefügt
+}
 
-const stopMyRecording = useCallback(async () => {
+
+const stopMyRecording = async () => {
   const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
   const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
   const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-  whisperStopRecording();
-  setIsRecording(false);
-  if (transcript.text) {
-    await fetchGpt();
-  } else {
-    console.log('No transcript available');
-  }
-}, [displayRawRizz]);  // displayRawRizz hinzugefügt
+    whisperStopRecording();
+    setIsRecording(false);
+    if (transcript.text) {
+      await fetchGpt();
+    } else {
+      console.log('No transcript available');
+    }
+}
 
 
 const relayCallback = (msg) => {
