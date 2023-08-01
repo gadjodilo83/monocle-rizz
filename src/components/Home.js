@@ -59,14 +59,8 @@ const stopMyRecording = useCallback(async () => {
   } else {
     console.log('No transcript available');
   }
-}, [displayRawRizz, fetchGpt, transcript.text, whisperStopRecording]);  // fetchGpt, transcript.text, whisperStopRecording hinzugefügt
+}, [displayRawRizz]);  // displayRawRizz hinzugefügt
 
-
-useEffect(() => {
-    if (!isRecording.current && transcript.text) {
-        fetchGpt();
-    }
-}, [transcript.text, fetchGpt]);  // fetchGpt hinzugefügt
 
 const relayCallback = (msg) => {
   if (!msg) {
