@@ -45,7 +45,7 @@ const startMyRecording = useCallback(async () => {
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
   whisperStartRecording();
   setIsRecording(true);
-}, [displayRawRizz]);  // displayRawRizz hinzugefügt
+}, [displayRawRizz, whisperStartRecording]);  // whisperStartRecording hinzugefügt
 
 const stopMyRecording = useCallback(async () => {
   const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
@@ -59,8 +59,14 @@ const stopMyRecording = useCallback(async () => {
   } else {
     console.log('No transcript available');
   }
-}, [displayRawRizz]);  // displayRawRizz hinzugefügt
+}, [displayRawRizz, fetchGpt, transcript.text, whisperStopRecording]);  // fetchGpt, transcript.text, whisperStopRecording hinzugefügt
 
+
+useEffect(() => {
+    if (!isRecording.current && transcript.text) {
+        fetchGpt();
+    }
+}, [transcript.text, fetchGpt]);  // fetchGpt hinzugefügt
 
 const relayCallback = (msg) => {
   if (!msg) {
