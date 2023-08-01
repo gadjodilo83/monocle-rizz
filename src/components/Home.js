@@ -279,7 +279,7 @@ async function displayRizz(rizz) {
     const textCmd = `display.show([${textCmds.join(", ")}])`;
     const clearCmd = "display.clear()";
 
-    await delay(100); // 2.5 Sekunden warten
+    await delay(2000); // 2.5 Sekunden warten
     await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
 	await delay(8000); // 2.5 Sekunden warten
 
