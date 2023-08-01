@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
@@ -36,69 +36,56 @@ const Home = () => {
 		},
 	});
 
+  const startMyRecording = useCallback(async () => {
+    const textCmd = `display.Text('Start Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
+    const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
+    const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+    await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+    whisperStartRecording();
+    setIsRecording(true);
+  }, [whisperStartRecording]);
 
-
-const startMyRecording = useCallback(async () => {
-  const textCmd = `display.Text('Start Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
-  const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
-  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
-  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-  whisperStartRecording();
-  setIsRecording(true);
-}, [displayRawRizz, whisperStartRecording]);  // whisperStartRecording hinzugefügt
-
-const stopMyRecording = useCallback(async () => {
-  const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
-  const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
-  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
-  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-  whisperStopRecording();
-  setIsRecording(false);
-  if (transcript.text) {
-    await fetchGpt();
-  } else {
-    console.log('No transcript available');
-  }
-}, [displayRawRizz, fetchGpt, transcript.text, whisperStopRecording]);  // fetchGpt, transcript.text, whisperStopRecording hinzugefügt
-
-
-useEffect(() => {
-    if (!isRecording.current && transcript.text) {
-        fetchGpt();
-    }
-}, [transcript.text, fetchGpt]);  // fetchGpt hinzugefügt
-
-const relayCallback = (msg) => {
-  if (!msg) {
-    return;
-  }
-  if (msg.trim() === "trigger b") {
-    // Left btn
-    console.log("Button B pressed");  // New line
-    fetchGpt();
-  }
-
-  if (msg.trim() === "trigger a") {
-    // Right btn
-    if(isRecording.current) {
-        stopMyRecording();
+  const stopMyRecording = useCallback(async () => {
+    const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
+    const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
+    const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+    await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+    whisperStopRecording();
+    setIsRecording(false);
+    if (transcript.text) {
+      await fetchGpt();
     } else {
-        startMyRecording();
+      console.log('No transcript available');
+    }
+  }, [fetchGpt, transcript.text, whisperStopRecording]);
+
+  const relayCallback = (msg) => {
+    if (!msg) {
+      return;
+    }
+    if (msg.trim() === "trigger b") {
+      // Left btn
+      console.log("Button B pressed");  // New line
+      fetchGpt();
+    }
+
+    if (msg.trim() === "trigger a") {
+      // Right btn
+      if(isRecording.current) {
+          stopMyRecording();
+      } else {
+          startMyRecording();
+      }
     }
   }
-}
 
-const onRecord = () => {
-  if(isRecording.current) {
-    stopMyRecording();
-  } else {
-    startMyRecording();
-  }
-};
-
-
-
-
+  const onRecord = () => {
+    if(isRecording.current) {
+      stopMyRecording();
+    } else {
+      startMyRecording();
+    }
+  };
 
   const [temperature, setTemperature] = useState(0.5);
   const [language, setLanguage] = useState("de");
@@ -129,54 +116,51 @@ const onRecord = () => {
     setSystemPrompt(systemPrompt);
   };
 
-const fetchGpt = async () => {
-  console.log("fetchGpt called");
-  try {
-    const messages = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: transcript.text }, // Verwende den transkribierten Text als Frage
-    ];
+  const fetchGpt = useCallback(async () => {
+    console.log("fetchGpt called");
+    try {
+      const messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: transcript.text }, // Verwende den transkribierten Text als Frage
+      ];
 
-    const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: messages,
-        temperature: temperature,
-        max_tokens: 250,
-      }),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
+      const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: messages,
+          temperature: temperature,
+          max_tokens: 250,
+        }),
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
 
-    if (!response.ok) {
-      const message = await response.text();
-      console.error("API request error:", response.status, message);
-      throw new Error(`API request failed: ${message}`);
+      if (!response.ok) {
+        const message = await response.text();
+        console.error("API request error:", response.status, message);
+        throw new Error(`API request failed: ${message}`);
+      }
+
+      const resJson = await response.json();
+      const res = resJson?.choices?.[0]?.message?.content;
+      if (!res) return;
+
+      setDisplayedResponse(res);
+      setResponse(res);
+      await displayRawRizz(res);
+    } catch (err) {
+      console.error(err);
     }
+  }, [systemPrompt, transcript.text, temperature, apiKey]);
 
-    const resJson = await response.json();
-    const res = resJson?.choices?.[0]?.message?.content;
-    if (!res) return;
-
-    setDisplayedResponse(res);
-    setResponse(res);
-    await displayRawRizz(res);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-
-
-useEffect(() => {
+  useEffect(() => {
     if (!isRecording.current && transcript.text) {
-        fetchGpt();
+      fetchGpt();
     }
-}, [transcript.text]);
-
+  }, [transcript.text, fetchGpt]);
 
   useEffect(() => {
     window.transcript = transcript.text;
@@ -259,64 +243,50 @@ useEffect(() => {
     </>
   );
 
-
-
-
   async function displayRawRizz(rizz) {
     await replRawMode(true);
     await displayRizz(rizz);
   }
 
-async function displayRizz(rizz) {
-  if (!rizz) return;
+  async function displayRizz(rizz) {
+    if (!rizz) return;
 
-  const splitText = wrapText(rizz);
-  const groupSize = 4;
+    const splitText = wrapText(rizz);
+    const groupSize = 4;
 
-  for (let i = 0; i < splitText.length; i += groupSize) {
-    const group = splitText.slice(i, i + groupSize);
-    const textCmds = group.map((text, index) => {
-      const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = index * 50; // Zeilen t1 bis t4
-      return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
-    });
+    for (let i = 0; i < splitText.length; i += groupSize) {
+      const group = splitText.slice(i, i + groupSize);
+      const textCmds = group.map((text, index) => {
+        const xCoordinate = 0; // Beispielwert für die x-Koordinate
+        const yCoordinate = index * 50; // Zeilen t1 bis t4
+        return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
+      });
 
-    const textCmd = `display.show([${textCmds.join(", ")}])`;
-    const clearCmd = "display.clear()";
+      const textCmd = `display.show([${textCmds.join(", ")}])`;
+      const clearCmd = "display.clear()";
 
-    await delay(100); // 2.5 Sekunden warten
-    await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
-	await delay(8000); // 2.5 Sekunden warten
-
+      await delay(100); // 2.5 Sekunden warten
+      await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
+	  await delay(8000); // 2.5 Sekunden warten
+    }
   }
-}
 
-
-function chunkArray(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
+  function cleanText(inputText) {
+    let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
+    cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
+    cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
+    return cleanedText;
   }
-  return result;
-}
 
-	function cleanText(inputText) {
-	  let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
-	  cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
-	  cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
-	  return cleanedText;
-	}
+  async function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
-	async function delay(ms) {
-	  return new Promise((resolve) => setTimeout(resolve, ms));
-	}
-
-	async function logger(msg) {
-	  if (msg === "Connected") {
-		setConnected(true);
-	  }
-	}
-
+  async function logger(msg) {
+    if (msg === "Connected") {
+      setConnected(true);
+    }
+  }
 
   function wrapText(inputText) {
     const block = 25;
