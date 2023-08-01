@@ -45,7 +45,7 @@ const startMyRecording = useCallback(async () => {
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
   whisperStartRecording();
   setIsRecording(true);
-}, [whisperStartRecording]);  // displayRawRizz entfernt
+}, [displayRawRizz, whisperStartRecording]);  // whisperStartRecording hinzugefügt
 
 const stopMyRecording = useCallback(async () => {
   const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
