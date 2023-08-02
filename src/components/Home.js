@@ -287,7 +287,7 @@ async function displayRizz(rizz) {
     const textCmds = group.map((text, index) => {
       const xCoordinate = 0; // Beispielwert für die x-Koordinate
       const yCoordinate = index * 50; // Zeilen t1 bis t4
-      return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, 0xffffff)`;
+      return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, display.WHITE)`;
     });
 
     const textCmd = `display.show([${textCmds.join(", ")}])`;
