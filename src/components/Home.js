@@ -39,8 +39,8 @@ const Home = () => {
 
 
 const startMyRecording = async () => {
-  const textCmd = `display.Text('Start Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
-  const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
+  const textCmd = `display.Text('Start Record', 320, 200, display.RED, justify=display.MIDDLE_CENTER)`;
+  const lineCmd = `display.Line(175, 230, 465, 230, display.RED)`;
   const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
   whisperStartRecording();
@@ -49,8 +49,8 @@ const startMyRecording = async () => {
 
 
 const stopMyRecording = async () => {
-  const textCmd = `display.Text('Stop Record', 320, 200, 0xffffff, justify=display.MIDDLE_CENTER)`;
-  const lineCmd = `display.Line(175, 230, 465, 230, 0xffffff)`;
+  const textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
+  const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
   const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
     whisperStopRecording();
@@ -124,8 +124,20 @@ const onRecord = () => {
     setSystemPrompt(systemPrompt);
   };
 
+
+
+const [fetching, setFetching] = useState(false);
+
 const fetchGpt = async () => {
+  if (fetching) {
+    console.log("Fetch already in progress");
+    return;
+  }
+  setFetching(true);
   console.log("fetchGpt called");
+
+
+
   try {
     const messages = [
       { role: "system", content: systemPrompt },
@@ -161,6 +173,8 @@ const fetchGpt = async () => {
     await displayRawRizz(res);
   } catch (err) {
     console.error(err);
+  } finally {
+    setFetching(false);
   }
 };
 
@@ -279,9 +293,9 @@ async function displayRizz(rizz) {
     const textCmd = `display.show([${textCmds.join(", ")}])`;
     const clearCmd = "display.clear()";
 
-    await delay(2000); // 2.5 Sekunden warten
+    await delay(100); // 2.5 Sekunden warten
     await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
-	await delay(8000); // 2.5 Sekunden warten
+	await delay(6000); // 2.5 Sekunden warten
 
   }
 }
