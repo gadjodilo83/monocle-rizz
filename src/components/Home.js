@@ -30,7 +30,7 @@ const Home = () => {
   const { startRecording: whisperStartRecording, stopRecording: whisperStopRecording, transcript } = useWhisper({
     apiKey: apiKey,
     streaming: true,
-    timeSlice: 500,
+    timeSlice: 8000,
     whisperConfig: {
       language: inputLanguage,
     },
@@ -44,32 +44,47 @@ const startMyRecording = async () => {
   whisperStartRecording();
   setIsRecording(true);
   setTimeout(async () => {
-    await stopMyRecording(true);
+	await stopMyRecording(true); 
+	await showAutomaticStop();
   }, 8000);  // 8000 milliseconds = 8 seconds
 }
 
-const stopMyRecording = async (automatic = false) => {
-  let textCmd;
-  if (automatic) {
-    textCmd = `display.Text('Record Auto-Halt', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
-  } else {
-    textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
-  }
+const showAutomaticStop = async () => {
+  const textCmd = `display.Text('Automatic stop', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
   const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
   const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-  whisperStopRecording();
-  setIsRecording(false);
-
-  // Füge einen kleinen Verzögerung hinzu, um sicherzustellen, dass das transkribierte Text bereit ist
   setTimeout(async () => {
-    if (transcript.text) {
-      await fetchGpt();
-    } else {
-      console.log('No transcript available');
-    }
-  }, 2000); // Wartezeit in Millisekunden
+    await clearDisplay();
+  }, 3000);
 }
+
+const clearDisplay = async () => {
+  const clearCmd = "display.clear()";
+  await replSend(`${clearCmd}\n`);
+}
+
+
+
+
+
+	const stopMyRecording = async () => {
+	  const textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
+	  const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
+	  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+	  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+	  whisperStopRecording();
+	  setIsRecording(false);
+
+	  // Füge einen kleinen Verzögerung hinzu, um sicherzustellen, dass das transkribierte Text bereit ist
+	  setTimeout(async () => {
+		if (transcript.text) {
+		  await fetchGpt();
+		} else {
+		  console.log('No transcript available');
+		}
+	  }, 2000); // Wartezeit in Millisekunden
+	}
 
   const relayCallback = (msg) => {
     if (!msg) {
@@ -91,7 +106,7 @@ const stopMyRecording = async (automatic = false) => {
     }
   }
 
-  const [temperature, setTemperature] = useState(0.3);
+  const [temperature, setTemperature] = useState(0.5);
   const [language, setLanguage] = useState("de");
   const [response, setResponse] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -141,7 +156,7 @@ const stopMyRecording = async (automatic = false) => {
           model: "gpt-3.5-turbo",
           messages: messages,
           temperature: temperature,
-          max_tokens: 150,
+          max_tokens: 250,
         }),
         headers: {
           Authorization: `Bearer ${apiKey}`,
