@@ -28,74 +28,62 @@ const Home = () => {
     setIsRecordingState(value);
   };
   const { startRecording: whisperStartRecording, stopRecording: whisperStopRecording, transcript } = useWhisper({
-		apiKey: apiKey,
-		streaming: true,
-		timeSlice: 500,
-		whisperConfig: {
-		  language: inputLanguage,
-		},
-	});
+    apiKey: apiKey,
+    streaming: true,
+    timeSlice: 500,
+    whisperConfig: {
+      language: inputLanguage,
+    },
+  });
 
+  const startMyRecording = async () => {
+    const textCmd = `display.Text('Start Record', 320, 200, display.RED, justify=display.MIDDLE_CENTER)`;
+    const lineCmd = `display.Line(175, 230, 465, 230, display.RED)`;
+    const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+    await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+    whisperStartRecording();
+    setIsRecording(true);
+  }
 
+	const stopMyRecording = async () => {
+	  const textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
+	  const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
+	  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+	  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+	  whisperStopRecording();
+	  setIsRecording(false);
 
-const startMyRecording = async () => {
-  const textCmd = `display.Text('Start Record', 320, 200, display.RED, justify=display.MIDDLE_CENTER)`;
-  const lineCmd = `display.Line(175, 230, 465, 230, display.RED)`;
-  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
-  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-  whisperStartRecording();
-  setIsRecording(true);
-}
+	  // Füge einen kleinen Verzögerung hinzu, um sicherzustellen, dass das transkribierte Text bereit ist
+	  setTimeout(async () => {
+		if (transcript.text) {
+		  await fetchGpt();
+		} else {
+		  console.log('No transcript available');
+		}
+	  }, 2000); // Wartezeit in Millisekunden
+	}
 
-
-const stopMyRecording = async () => {
-  const textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
-  const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
-  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
-  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-    whisperStopRecording();
-    setIsRecording(false);
-    if (transcript.text) {
-      await fetchGpt();
-    } else {
-      console.log('No transcript available');
+  const relayCallback = (msg) => {
+    if (!msg) {
+      return;
     }
-}
+    if (msg.trim() === "trigger b") {
+      // Left btn
+      console.log("Button B pressed");
+      fetchGpt();
+    }
 
-
-const relayCallback = (msg) => {
-  if (!msg) {
-    return;
-  }
-  if (msg.trim() === "trigger b") {
-    // Left btn
-    console.log("Button B pressed");  // New line
-    fetchGpt();
-  }
-
-  if (msg.trim() === "trigger a") {
-    // Right btn
-    if(isRecording.current) {
-        stopMyRecording();
-    } else {
-        startMyRecording();
+    if (msg.trim() === "trigger a") {
+      // Right btn
+      if(isRecording.current) {
+          stopMyRecording();
+      } else {
+          startMyRecording();
+      }
     }
   }
-}
 
-const onRecord = () => {
-  if(isRecording.current) {
-    stopMyRecording();
-  } else {
-    startMyRecording();
-  }
-};
-
-
-
-
-
-  const [temperature, setTemperature] = useState(0.5);
+  const [temperature, setTemperature] = useState(0.3);
   const [language, setLanguage] = useState("de");
   const [response, setResponse] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -124,68 +112,61 @@ const onRecord = () => {
     setSystemPrompt(systemPrompt);
   };
 
+  const [fetching, setFetching] = useState(false);
 
-
-const [fetching, setFetching] = useState(false);
-
-const fetchGpt = async () => {
-  if (fetching) {
-    console.log("Fetch already in progress");
-    return;
-  }
-  setFetching(true);
-  console.log("fetchGpt called");
-
-
-
-  try {
-    const messages = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: transcript.text }, // Verwende den transkribierten Text als Frage
-    ];
-
-    const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: messages,
-        temperature: temperature,
-        max_tokens: 250,
-      }),
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    });
-
-    if (!response.ok) {
-      const message = await response.text();
-      console.error("API request error:", response.status, message);
-      throw new Error(`API request failed: ${message}`);
+  const fetchGpt = async () => {
+    if (fetching) {
+      console.log("Fetch already in progress");
+      return;
     }
+    setFetching(true);
+    console.log("fetchGpt called");
 
-    const resJson = await response.json();
-    const res = resJson?.choices?.[0]?.message?.content;
-    if (!res) return;
+    try {
+      const messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: transcript.text },
+      ];
 
-    setDisplayedResponse(res);
-    setResponse(res);
-    await displayRawRizz(res);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    setFetching(false);
-  }
-};
+      const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: messages,
+          temperature: temperature,
+          max_tokens: 250,
+        }),
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
 
+      if (!response.ok) {
+        const message = await response.text();
+        console.error("API request error:", response.status, message);
+        throw new Error(`API request failed: ${message}`);
+      }
 
+      const resJson = await response.json();
+      const res = resJson?.choices?.[0]?.message?.content;
+      if (!res) return;
 
-useEffect(() => {
-    if (!isRecording.current && transcript.text) {
-        fetchGpt();
+      setDisplayedResponse(res);
+      setResponse(res);
+      await displayRawRizz(res);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFetching(false);
     }
-}, [transcript.text]);
+  };
 
+  useEffect(() => {
+      if (!isRecording.current && transcript.text) {
+          fetchGpt();
+      }
+  }, [transcript.text]);
 
   useEffect(() => {
     window.transcript = transcript.text;
@@ -255,9 +236,6 @@ useEffect(() => {
             >
               Connect
             </Button>
-            <Button className="mb-2" onClick={onRecord}>
-              {isRecording ? "Stop recording" : "Start recording"}
-            </Button>
             <Button className="mb-2" onClick={fetchGpt}>
               Get response
             </Button>
@@ -268,64 +246,58 @@ useEffect(() => {
     </>
   );
 
-
-
-
   async function displayRawRizz(rizz) {
     await replRawMode(true);
     await displayRizz(rizz);
   }
 
-async function displayRizz(rizz) {
-  if (!rizz) return;
+  async function displayRizz(rizz) {
+    if (!rizz) return;
 
-  const splitText = wrapText(rizz);
-  const groupSize = 4;
+    const splitText = wrapText(rizz);
+    const groupSize = 4;
 
-  for (let i = 0; i < splitText.length; i += groupSize) {
-    const group = splitText.slice(i, i + groupSize);
-    const textCmds = group.map((text, index) => {
-      const xCoordinate = 0; // Beispielwert für die x-Koordinate
-      const yCoordinate = index * 50; // Zeilen t1 bis t4
-      return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, display.WHITE)`;
-    });
+    for (let i = 0; i < splitText.length; i += groupSize) {
+      const group = splitText.slice(i, i + groupSize);
+      const textCmds = group.map((text, index) => {
+        const xCoordinate = 0; // Beispielwert für die x-Koordinate
+        const yCoordinate = index * 50; // Zeilen t1 bis t4
+        return `display.Text('${cleanText(text.replace(/"/g, ""))}', ${xCoordinate}, ${yCoordinate}, display.WHITE)`;
+      });
 
-    const textCmd = `display.show([${textCmds.join(", ")}])`;
-    const clearCmd = "display.clear()";
+      const textCmd = `display.show([${textCmds.join(", ")}])`;
+      const clearCmd = "display.clear()";
 
-    await delay(100); // 2.5 Sekunden warten
-    await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
-	await delay(6000); // 2.5 Sekunden warten
-
+      await delay(100); // 2.5 Sekunden warten
+      await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
+      await delay(6000); // 2.5 Sekunden warten
+    }
   }
-}
 
-
-function chunkArray(array, size) {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
+  function chunkArray(array, size) {
+    const result = [];
+    for (let i = 0; i < array.length; i += size) {
+      result.push(array.slice(i, i + size));
+    }
+    return result;
   }
-  return result;
-}
 
-	function cleanText(inputText) {
-	  let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
-	  cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
-	  cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
-	  return cleanedText;
-	}
+  function cleanText(inputText) {
+    let cleanedText = inputText.replace(/\\/g, ""); // remove backslashes
+    cleanedText = cleanedText.replace(/""/g, '"'); // replace double quotes with single quotes
+    cleanedText = cleanedText.replace(/\n/g, ""); // remove line breaks
+    return cleanedText;
+  }
 
-	async function delay(ms) {
-	  return new Promise((resolve) => setTimeout(resolve, ms));
-	}
+  async function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 
-	async function logger(msg) {
-	  if (msg === "Connected") {
-		setConnected(true);
-	  }
-	}
-
+  async function logger(msg) {
+    if (msg === "Connected") {
+      setConnected(true);
+    }
+  }
 
   function wrapText(inputText) {
     const block = 25;
