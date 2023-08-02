@@ -50,7 +50,7 @@ const startMyRecording = async () => {
 }
 
 const showAutomaticStop = async () => {
-  const textCmd = `display.Text('Automatic stop', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
+  const textCmd = `display.Text('Automatic Stop', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
   const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
   const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
   await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
@@ -63,7 +63,6 @@ const clearDisplay = async () => {
   const clearCmd = "display.clear()";
   await replSend(`${clearCmd}\n`);
 }
-
 
 
 
@@ -106,7 +105,7 @@ const clearDisplay = async () => {
     }
   }
 
-  const [temperature, setTemperature] = useState(0.5);
+  const [temperature, setTemperature] = useState(0.3);
   const [language, setLanguage] = useState("de");
   const [response, setResponse] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -156,7 +155,7 @@ const clearDisplay = async () => {
           model: "gpt-3.5-turbo",
           messages: messages,
           temperature: temperature,
-          max_tokens: 250,
+          max_tokens: 400,
         }),
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -293,7 +292,7 @@ const clearDisplay = async () => {
 
       await delay(100); // 2.5 Sekunden warten
       await replSend(`${clearCmd}\n${textCmd}\n`); // clear() und display.show senden
-      await delay(6000); // 2.5 Sekunden warten
+      await delay(7000); // 2.5 Sekunden warten
     }
   }
 
