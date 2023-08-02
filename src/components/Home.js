@@ -36,32 +36,40 @@ const Home = () => {
     },
   });
 
-  const startMyRecording = async () => {
-    const textCmd = `display.Text('Start Record', 320, 200, display.RED, justify=display.MIDDLE_CENTER)`;
-    const lineCmd = `display.Line(175, 230, 465, 230, display.RED)`;
-    const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
-    await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-    whisperStartRecording();
-    setIsRecording(true);
+const startMyRecording = async () => {
+  const textCmd = `display.Text('Start Record', 320, 200, display.RED, justify=display.MIDDLE_CENTER)`;
+  const lineCmd = `display.Line(175, 230, 465, 230, display.RED)`;
+  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+  whisperStartRecording();
+  setIsRecording(true);
+  setTimeout(async () => {
+    await stopMyRecording(true);
+  }, 8000);  // 8000 milliseconds = 8 seconds
+}
+
+const stopMyRecording = async (automatic = false) => {
+  let textCmd;
+  if (automatic) {
+    textCmd = `display.Text('Record Auto-Halt', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
+  } else {
+    textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
   }
+  const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
+  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
+  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
+  whisperStopRecording();
+  setIsRecording(false);
 
-	const stopMyRecording = async () => {
-	  const textCmd = `display.Text('Stop Record', 320, 200, display.GREEN, justify=display.MIDDLE_CENTER)`;
-	  const lineCmd = `display.Line(175, 230, 465, 230, display.GREEN)`;
-	  const showCmd = `display.show([${textCmd}, ${lineCmd}])`;
-	  await replSend(`${textCmd}\n${lineCmd}\n${showCmd}\n`);
-	  whisperStopRecording();
-	  setIsRecording(false);
-
-	  // Füge einen kleinen Verzögerung hinzu, um sicherzustellen, dass das transkribierte Text bereit ist
-	  setTimeout(async () => {
-		if (transcript.text) {
-		  await fetchGpt();
-		} else {
-		  console.log('No transcript available');
-		}
-	  }, 2000); // Wartezeit in Millisekunden
-	}
+  // Füge einen kleinen Verzögerung hinzu, um sicherzustellen, dass das transkribierte Text bereit ist
+  setTimeout(async () => {
+    if (transcript.text) {
+      await fetchGpt();
+    } else {
+      console.log('No transcript available');
+    }
+  }, 2000); // Wartezeit in Millisekunden
+}
 
   const relayCallback = (msg) => {
     if (!msg) {
@@ -133,7 +141,7 @@ const Home = () => {
           model: "gpt-3.5-turbo",
           messages: messages,
           temperature: temperature,
-          max_tokens: 250,
+          max_tokens: 150,
         }),
         headers: {
           Authorization: `Bearer ${apiKey}`,
