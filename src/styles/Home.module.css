@@ -3,11 +3,10 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 6rem;
+  padding: 2rem 6rem 6rem; /* Reduziertes oberes Padding */
   min-height: 100vh;
-  background-color: black;
-  color: turquoise;
 }
+
 
 
 .description {
@@ -279,3 +278,8 @@
     transform: rotate(0deg);
   }
 }
+
+
+
+
+
