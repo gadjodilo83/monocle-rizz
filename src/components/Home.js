@@ -217,7 +217,7 @@ return (
       </Head>
       <main className={`${inter.className} ${styles.main}`} style={{ background: 'linear-gradient(160deg, #1a1a1a 60%, #0d0d0d 100%)' }}>
 		<div className="flex w-screen h-screen flex-col items-center justify-center" style={{ marginTop: '-16%' }}>
-          <h1 className="text-3xl text-gradient mb-4" style={{ background: 'linear-gradient(90deg, #3f87a6, #ebf8e1, #f69d3c)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent' }}>monocleGPT</h1>
+          <h1 className="text-3xl text-gradient mb-4" style={{ background: 'linear-gradient(90deg, #3f87a6, #ebf8e1, #f69d3c)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent' }}>monocleTranslator</h1>
           <p className="text-3xl mb-4 text-white">
             {connected ? "Connected" : "Disconnected"}
           </p>
